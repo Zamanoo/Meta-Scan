@@ -332,7 +332,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي الهجين لفحص النصوص والصور المرئية وتجنب القيود والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيود والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
