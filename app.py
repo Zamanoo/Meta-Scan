@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتوحيد حجم خط جميع الأزرار بدقة ليكون 0.92rem
+# CSS موحد للثيم الداكن وتوحيد حجم وسُمك خط جميع الأزرار ليكون 0.92rem و Bold بارز
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,12 +101,12 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* توحيد حجم وسُمك وخط جميع أزرار Streamlit لتكون بقيمة 0.92rem تماماً */
+/* توحيد حجم وسُمك الخط في جميع أزرار Streamlit ليصبح Bold بارز (700) وبحجم 0.92rem */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
     color: #ffffff !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     border-radius: 8px !important;
     padding: 10px !important;
     border: none !important;
@@ -332,7 +332,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيود والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>نظام فحص ذكي لتجنب قيود وحظر منصة ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -341,7 +341,7 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع حجم خط 0.92rem ومحاذاة دقيقة
+    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع سُمك بارز 700 وحجم 0.92rem
     col_right, col_left = st.columns(2)
     
     with col_right:
@@ -364,7 +364,7 @@ if menu_option == "الرئيسية":
             width: 100%;
             background-color: #0068c4;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 8px;
             padding: 10px;
             border: none;
