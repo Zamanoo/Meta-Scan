@@ -179,31 +179,4 @@ if menu_option == "الرئيسية":
     st.markdown("### ✍️ فحص نصوص المنشور")
     post_content = st.text_area("نص المنشور:", height=120, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area")
 
-    if st.button("🔍 ابدأ فحص النص العميق", key="btn_text_scan"):
-        if not post_content.strip():
-            st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
-        else:
-            found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
-            
-            with st.spinner("⏳ جاري التحليل العميق للسياق بواسطة Llama 3.1..."):
-                try:
-                    system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
-                    completion = groq_client.chat.completions.create(
-                        model="llama-3.1-8b-instant",
-                        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}],
-                        temperature=0.3,
-                        max_tokens=1024
-                    )
-                    
-                    st.success("✅ تم فحص النص بنجاح!")
-                    
-                    if found_local_words:
-                        st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-                    
-                    st.markdown("### 📊 تقرير تحليل النص:")
-                    st.markdown(completion.choices[0].message.content)
-                except Exception as e:
-                    st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="section-box
+    if st.button("🔍 ابدأ فحص النص العميق", key="btn_text_scan
