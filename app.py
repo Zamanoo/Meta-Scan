@@ -10,6 +10,7 @@ from groq import Groq
 import google.generativeai as genai
 from PIL import Image
 from local_filter import SUSPICIOUS_KEYWORDS
+import time
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
@@ -139,16 +140,25 @@ groq_client = Groq(api_key=groq_key)
 
 def analyze_image_with_fallback(image, prompt):
     last_error = None
-    for key in GEMINI_KEYS:
+    for idx, key in enumerate(GEMINI_KEYS):
         try:
             genai.configure(api_key=key)
             model = genai.GenerativeModel('gemini-3.8-flash')
             response = model.generate_content([prompt, image])
             return response.text
         except Exception as e:
-            last_error = e
+            last_error = str(e)
+            # إذا كان الخطأ متعلقاً بتجاوز الحصة (429)، ننتظر قليلاً وننتقل للمفتاح التالي
+            if "429" in last_error or "Quota exceeded" in last_error:
+                time.sleep(1)
+                continue
             continue
-    raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini. الخطأ الأخير: {last_error}")
+    
+    # إذا كانت المشكلة هي تجاوز الحصة للجميع
+    if last_error and ("429" in last_error or "Quota exceeded" in last_error):
+        raise Exception("تم الوصول للحد الأقصى لعدد طلبات الفحص المجانية في الدقيقة (Rate Limit). يرجى الانتظار لمدة دقيقة ثم المحاولة مرة أخرى.")
+    else:
+        raise Exception(f"خطأ في الاتصال بنظام تحليل الصور: {last_error}")
 
 menu_option = st.selectbox(
     "اختر القسم:",
