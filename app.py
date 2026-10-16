@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS تكيفي محترف يدعم وضع النهار (Light) ووضع الليل (Dark) تلقائياً
+# CSS متكيف ومحدث لضمان وضوح العناوين تماماً في وضع النهار والليل
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -85,7 +85,7 @@ html, body, [class*='css'] {
     color: #e2e8f0 !important;
 }
 
-/* عناوين الأقسام - تتكيف تلقائياً بين الأبيض والكحلي الداكن */
+/* عناوين الأقسام - تتكيف بوضوح تام بين النهار والليل */
 .section-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -95,7 +95,7 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* البطاقات - تتكيف خلفياتها وإطاراتها حسب ثيم النظام */
+/* البطاقات التكيفية */
 .section-box {
     background-color: var(--bg-card);
     padding: 12px 14px;
@@ -125,7 +125,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* توحيد الأزرار بلون أزرق ثابت ممتاز لكل الأوضاع */
+/* الأزرار بلون أزرق ثابت وواضح */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
