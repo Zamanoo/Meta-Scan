@@ -145,7 +145,7 @@ def analyze_image_with_groq(image, prompt):
     image_url = f"data:image/jpeg;base64,{img_str}"
     
     completion = groq_client.chat.completions.create(
-        model="meta-llama/llama-3.2-11b-vision-instruct", # تم التحديث إلى النموذج النشط حالياً
+        model="llama-3.2-90b-vision-preview", # تم التعديل إلى نموذج 90b المتوفر والمدعوم للرؤية
         messages=[
             {
                 "role": "user",
