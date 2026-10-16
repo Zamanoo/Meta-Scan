@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتمديد الأعمدة لتصل الأزرار للحواف تماماً
+# CSS موحد للثيم الداكن وضبط محاذاة الأزرار والمربعات بدقة تامة للحواف
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,7 +101,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* تنسيق الأزرار لتغطية كامل الحواف للأعمدة */
+/* تنسيق أزرار Streamlit العادية */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -117,11 +117,11 @@ html, body, [class*='css'] {
     background-color: #004d99 !important;
 }
 
-/* ضبط الهوامش بين الأعمدة لتكون متلاصقة نحو الحواف */
+/* إزالة الفراغات الزائدة بين أعمدة الأزرار لتلتصق بالحواف تماماً */
 [data-testid="stHorizontalBlock"] {
     display: flex !important;
     flex-direction: row !important;
-    gap: 6px !important;
+    gap: 8px !important;
     direction: rtl !important;
 }
 [data-testid="stHorizontalBlock"] > div {
@@ -337,43 +337,41 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # حقن معرف برمجي (ID) فريد على عنصر الtextarea لضمان التقاط جافاسكريبت له بدقة مطلقة
-    st.components.v1.html(f"""
-        <script>
-            const textarea = window.parent.document.querySelector('textarea[aria-label="نص المنشور:"]') || 
-                             window.parent.document.querySelector('textarea');
-            if (textarea) {{
-                textarea.id = 'target-post-textarea';
-            }}
-        </script>
-    """, height=0)
-
-    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر النسخ لتصل الأزرار للحواف تماماً
+    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ يعمل مباشرة عبر JavaScript متطور وملاصق للحافة
     col_right, col_left = st.columns(2)
     
     with col_right:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
-        btn_copy = st.button("📋 نسخ النص", key="btn_text_copy")
-
-    # جافاسكريبت لنسخ النص المكتوب فوراً عند الضغط على زر النسخ
-    if btn_copy:
-        st.components.v1.html("""
-            <script>
-                const textarea = window.parent.document.querySelector('#target-post-textarea') || 
-                                 window.parent.document.querySelector('textarea');
-                if (textarea && textarea.value.trim() !== '') {
-                    navigator.clipboard.writeText(textarea.value).then(() => {
-                        alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
-                    }).catch(err => {
-                        console.error('Failed to copy: ', err);
-                    });
-                } else {
-                    alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
-                }
-            </script>
-        """, height=0)
+        # زر نسخ مباشر بـ HTML/JS لضمان الالتصاق بأقصى اليسار والعمل الفوري بدون إعادة تحميل
+        st.markdown("""
+        <button onclick="
+            const textarea = window.parent.document.querySelector('textarea');
+            if (textarea && textarea.value.trim() !== '') {
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
+                });
+            } else {
+                alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
+            }
+        " style="
+            width: 100%;
+            background-color: #0068c4;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 10px;
+            border: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 0px;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+        " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
+            📋 نسخ النص
+        </button>
+        """, unsafe_allow_html=True)
 
     if btn_text:
         if not post_content.strip():
