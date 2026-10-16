@@ -246,7 +246,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيد والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -269,11 +269,12 @@ if menu_option == "الرئيسية":
                         "إذا كان يحتوي مخاطر وحظر مباشر اكتب في السطر الأول: STATUS: DANGER\n"
                         "إذا كان يحتوي كلمات محتملة للشك اكتب في السطر الأول: STATUS: WARNING\n\n"
                         "ثم اكتب التقرير بالهيكلية التالية:\n"
-                        "### 📊 الخلاصة والتصنيف:\n"
-                        "(وضح فيه التقييم العام بشكل مختصر)\n\n"
+                        "### 📋 خلاصة الفحص والتقييم العام:\n"
+                        "(ملخص شامل وسريع عن حالة النص للقبول الإعلاني)\n\n"
                         "### 🔍 التقرير التفصيلي والكلمات الحساسة:\n"
-                        "(فحص الكلمات، السياق، والمخاطر)\n\n"
-                        "### 💡 البديل الموصى به والمتوافق:"
+                        "(فحص الكلمات الحساسة، السياق، والمخاطر المباشرة أو الخفية)\n\n"
+                        "### 💡 البديل الموصى به والمتوافق:\n"
+                        "(صياغة بديلة آمنة ومضمونة 100% لتجنب أي رفض إعلاني)"
                     )
                     
                     completion = groq_client.chat.completions.create(
@@ -292,10 +293,8 @@ if menu_option == "الرئيسية":
                     if found_local_words:
                         st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
                     
-                    # تنظيف النص المرجح من الرموز البرمجية
+                    # تنظيف النص المرجع وعرضه مباشرة بدون عناوين مكررة
                     clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
-                    
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص النص:</h4>", unsafe_allow_html=True)
                     st.markdown(clean_report)
                     
                 except Exception as e:
@@ -322,9 +321,12 @@ if menu_option == "الرئيسية":
                         "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
                         "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
                         "ثم اكتب التقرير بوضوح:\n"
-                        "### 📊 الخلاصة والتصنيف:\n"
+                        "### 📋 خلاصة الفحص والتقييم العام:\n"
+                        "(ملخص شامل وسريع عن حالة الصورة للقبول الإعلاني)\n\n"
                         "### 👤 فحص الشخصيات والعناصر المرئية:\n"
-                        "### 💡 التوصيات للتعديل والقبول الإعلاني:"
+                        "(فحص الوجوه، الشخصيات العامة أو السياسية، الأسلحة، الرموز والشعارات)\n\n"
+                        "### 💡 التوصيات والتعديلات المطلوبة:\n"
+                        "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
                     
                     res_text = analyze_image_with_gemini_rotation(image, image_prompt)
@@ -333,9 +335,8 @@ if menu_option == "الرئيسية":
                     # عرض بطاقة المؤشر البصري للصورة
                     render_status_badge(res_text)
                     
+                    # تنظيف التقرير وعرضه مباشرة بدون عناوين مكررة
                     clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
-                    
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(clean_img_report)
                     
                 except Exception as e:
