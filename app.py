@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-CSS موحد للثيم الداكن وضبط محاذاة الأزرار والمربعات بدقة تامة للحواف
+CSS موحد للثيم الداكن وتوحيد حجم خط جميع الأزرار بدقة ليكون 0.92rem
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,20 +101,24 @@ margin-bottom: 2px;
 font-size: 0.85rem;
 }
 
-/* تنسيق أزرار Streamlit العادية */
+/* توحيد حجم وحجم وخط جميع أزرار Streamlit لتكون بقيمة 0.92rem تماماً */
 .stButton>button {
 width: 100% !important;
 background-color: #0068c4 !important;
 color: #ffffff !important;
-font-weight: bold !important;
+font-weight: 600 !important;
 border-radius: 8px !important;
 padding: 10px !important;
 border: none !important;
-font-size: 0.95rem !important;
+font-size: 0.92rem !important;
 margin-top: 0px !important;
+font-family: 'Cairo', sans-serif !important;
+box-sizing: border-box !important;
+text-align: center !important;
 }
 .stButton>button:hover {
 background-color: #004d99 !important;
+color: #ffffff !important;
 }
 
 /* إزالة الفراغات الزائدة بين أعمدة الأزرار لتلتصق بالحواف تماماً */
@@ -337,7 +341,7 @@ st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</d
 dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
 post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-# توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML مع هامش -8px
+# توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع حجم خط 0.92rem ومحاذاة دقيقة
 col_right, col_left = st.columns(2)
 
 with col_right:
@@ -360,13 +364,13 @@ alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه
 width: 100%;
 background-color: #0068c4;
 color: white;
-font-weight: bold;
+font-weight: 600;
 border-radius: 8px;
 padding: 10px;
 border: none;
-font-size: 0.95rem;
+font-size: 0.92rem;
 cursor: pointer;
-margin-top: -8px;
+margin-top: -10px;
 text-align: center;
 font-family: 'Cairo', sans-serif;
 " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
