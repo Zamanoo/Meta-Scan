@@ -142,8 +142,8 @@ def analyze_image_with_fallback(image, prompt):
     for key in GEMINI_KEYS:
         try:
             genai.configure(api_key=key)
-            # تم التحديث إلى النموذج الأحدث والنشط رسمياً من Google
-            model = genai.GenerativeModel('gemini-2.5-flash')
+            # تم التحديث إلى النموذج الجديد المقترح رسميًا من Google
+            model = genai.GenerativeModel('gemini-3.8-flash')
             response = model.generate_content([prompt, image])
             return response.text
         except Exception as e:
@@ -285,6 +285,6 @@ st.markdown("""
     <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
     "هذه النتائج تقديرية مبنية على معايير المجتمع من شركة Meta وليس قرارًا رسميًا من Meta".
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=Type)
 
 st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
