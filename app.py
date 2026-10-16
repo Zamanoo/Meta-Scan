@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وضبط محاذاة الأزرار والمربعات بدقة تامة للحواف
+# CSS موحد للثيم الداكن وتوحيد خط وشكل كافة الأزرار لتكون متطابقة تماماً
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,7 +101,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* تنسيق أزرار Streamlit العادية */
+/* توحيد تنسيق جميع أزرار Streamlit لتتطابق تماماً في الخط والحجم والتصميم مع زر النسخ */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -112,9 +112,13 @@ html, body, [class*='css'] {
     border: none !important;
     font-size: 0.95rem !important;
     margin-top: 0px !important;
+    font-family: 'Cairo', sans-serif !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
+    color: #ffffff !important;
 }
 
 /* إزالة الفراغات الزائدة بين أعمدة الأزرار لتلتصق بالحواف تماماً */
@@ -337,7 +341,7 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML مع هامش -10px
+    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع هامش -10px للضبط الدقيق
     col_right, col_left = st.columns(2)
     
     with col_right:
