@@ -160,7 +160,7 @@ html, body, [class*='css'] {
 </style>
 """, unsafe_allow_html=True)
 
-# تهيئة إدارة الحالة (Session State) لتفعيل زر إعادة الضبط وفحص جديد
+# تهيئة إدارة الحالة (Session State)
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
@@ -260,13 +260,7 @@ if menu_option == "الرئيسية":
     
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area", label_visibility="collapsed")
     
-    col_btn1, col_btn2 = st.columns([3, 1])
-    with col_btn1:
-        btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
-    with col_btn2:
-        if st.button("🔄 فحص جديد", key="reset_text_btn"):
-            st.session_state.text_result = None
-            st.rerun()
+    btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
 
     if btn_text:
         if not post_content.strip():
@@ -302,7 +296,7 @@ if menu_option == "الرئيسية":
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
 
-    # عرض نتائج فحص النص إذا وجدت مخزنة في الجلسة
+    # عرض النتائج وزر فحص جديد فقط إذا تمت عملية الفحص وظهرت النتيجة
     if st.session_state.text_result:
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
@@ -313,6 +307,11 @@ if menu_option == "الرئيسية":
         
         clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
         st.markdown(clean_report)
+        
+        # ظهور زر "فحص جديد" أسفل النتيجة حصراً
+        if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
+            st.session_state.text_result = None
+            st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -326,13 +325,7 @@ if menu_option == "الرئيسية":
         image = Image.open(uploaded_image)
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
         
-        col_img1, col_img2 = st.columns([3, 1])
-        with col_img1:
-            btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
-        with col_img2:
-            if st.button("🔄 فحص جديد", key="reset_img_btn"):
-                st.session_state.image_result = None
-                st.rerun()
+        btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
             with st.spinner("جاري فحص الصورة والتعرف على العناصر..."):
@@ -359,13 +352,18 @@ if menu_option == "الرئيسية":
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
-    # عرض نتائج فحص الصورة إذا وجدت مخزنة في الجلسة
+    # عرض نتائج فحص الصورة وزر فحص جديد فقط عند ظهور النتيجة
     if st.session_state.image_result:
         res_text = st.session_state.image_result
         render_status_badge(res_text)
         
         clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
         st.markdown(clean_img_report)
+        
+        # ظهور زر "فحص صورة جديدة" أسفل النتيجة حصراً
+        if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
+            st.session_state.image_result = None
+            st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
