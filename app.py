@@ -14,15 +14,15 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد ومستقر للثيم الداكن الدائم والبطاقات التفاعلية
+# CSS موحد ومستقر للثيم الداكن الدائم والبطاقات التفاعلية والاتجاه العربي الصريح
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 
 html, body, [class*='css'] {
     font-family: 'Cairo', sans-serif;
-    direction: rtl;
-    text-align: right;
+    direction: rtl !important;
+    text-align: right !important;
 }
 
 .block-container {
@@ -33,8 +33,8 @@ html, body, [class*='css'] {
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div {
-    direction: rtl;
-    text-align: right;
+    direction: rtl !important;
+    text-align: right !important;
 }
 
 [data-testid="stSidebar"] {
@@ -46,19 +46,19 @@ html, body, [class*='css'] {
     padding: 12px 10px;
     border-radius: 10px;
     color: #ffffff !important;
-    text-align: center;
+    text-align: center !important;
     margin-bottom: 10px;
 }
 .main-header h1 {
     font-size: 1.4rem;
     margin-bottom: 4px;
-    text-align: center;
+    text-align: center !important;
     color: #ffffff !important;
 }
 .main-header p {
     font-size: 0.8rem;
     margin: 0;
-    text-align: center;
+    text-align: center !important;
     color: #e2e8f0 !important;
 }
 
@@ -75,8 +75,8 @@ html, body, [class*='css'] {
     font-weight: 700 !important;
     color: #ffffff !important;
     margin-bottom: 8px;
-    direction: rtl;
-    text-align: right;
+    direction: rtl !important;
+    text-align: right !important;
 }
 
 .disclaimer-box {
@@ -88,8 +88,8 @@ html, body, [class*='css'] {
     margin-bottom: 6px;
     font-size: 0.82rem;
     color: #cbd5e1 !important;
-    direction: rtl;
-    text-align: right;
+    direction: rtl !important;
+    text-align: right !important;
     line-height: 1.4;
 }
 .disclaimer-title {
@@ -123,8 +123,8 @@ html, body, [class*='css'] {
     color: #856404;
     margin-top: 8px;
     font-size: 0.85rem;
-    direction: rtl;
-    text-align: right;
+    direction: rtl !important;
+    text-align: right !important;
 }
 
 /* بطاقات مؤشرات النتيجة التفاعلية */
@@ -137,7 +137,7 @@ html, body, [class*='css'] {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    direction: rtl;
+    direction: rtl !important;
 }
 
 .status-safe {
@@ -156,6 +156,22 @@ html, body, [class*='css'] {
     background-color: rgba(239, 68, 68, 0.15);
     border: 2px solid #ef4444;
     color: #f87171 !important;
+}
+
+/* حاوية مخصصة لفرض الاتجاه العربي RTL للتقارير المخرجة */
+.report-container {
+    direction: rtl !important;
+    text-align: right !important;
+    color: #f8fafc;
+    line-height: 1.6;
+}
+.report-container h3 {
+    direction: rtl !important;
+    text-align: right !important;
+    color: #60a5fa !important;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-size: 1.05rem;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -191,7 +207,7 @@ if not gemini_keys:
 def analyze_image_with_gemini_rotation(image, prompt):
     global gemini_keys
     last_error = None
-    
+
     for api_key in gemini_keys:
         try:
             genai.configure(api_key=api_key)
@@ -213,7 +229,7 @@ def analyze_image_with_gemini_rotation(image, prompt):
                 continue
             else:
                 continue
-                
+
     raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح والموديلات المتاحة: {last_error}")
 
 def render_status_badge(text_content):
@@ -259,11 +275,11 @@ if menu_option == "الرئيسية":
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
-    
+
     # استخدام مفتاح ديناميكي يتغير رقمه عند الضغط على فحص جديد لمسح الصندوق تماماً
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
-    
+
     btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
 
     if btn_text:
@@ -287,31 +303,33 @@ if menu_option == "الرئيسية":
                         "### 💡 البديل الموصى به والمتوافق:\n"
                         "(صياغة بديلة آمنة ومضمونة 100% لتجنب أي رفض إعلاني)"
                     )
-                    
+
                     completion = groq_client.chat.completions.create(
                         model="openai/gpt-oss-20b", 
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], 
                         temperature=0.3, 
                         max_tokens=1024
                     )
-                    
+
                     st.session_state.text_result = completion.choices[0].message.content
                     st.success("✅ تم فحص النص بنجاح!")
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
 
-    # عرض النتائج وزر فحص جديد فقط إذا تمت عملية الفحص وظهرت النتيجة
+    # عرض النتائج من اليمين إلى اليسار (RTL)
     if st.session_state.text_result:
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
-        
+
         found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-        
+
         clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
-        st.markdown(clean_report)
         
+        # تغليف مخرجات التقرير بقالب RTL لضمان المحاذاة الكاملة نحو اليمين
+        st.markdown(f'<div class="report-container">{clean_report}</div>', unsafe_allow_html=True)
+
         # ظهور زر "فحص جديد" وتغيير عداد المفتاح لتفريغ الصندوق والنتائج معاً
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
@@ -323,13 +341,13 @@ if menu_option == "الرئيسية":
     # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
-    
+
     uploaded_image = st.file_uploader("اختر ملف الصورة (PNG, JPG, JPEG):", type=["png", "jpg", "jpeg"], key="image_upload_area", label_visibility="collapsed")
 
     if uploaded_image:
         image = Image.open(uploaded_image)
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
-        
+
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
@@ -349,7 +367,7 @@ if menu_option == "الرئيسية":
                         "### 💡 التوصيات والتعديلات المطلوبة:\n"
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
-                    
+
                     st.session_state.image_result = analyze_image_with_gemini_rotation(image, image_prompt)
                     st.success("✅ تم الفحص البصري بنجاح!")
                 except Exception as e:
@@ -357,14 +375,16 @@ if menu_option == "الرئيسية":
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
-    # عرض نتائج فحص الصورة وزر فحص جديد فقط عند ظهور النتيجة
+    # عرض نتائج فحص الصورة من اليمين إلى اليسار (RTL)
     if st.session_state.image_result:
         res_text = st.session_state.image_result
         render_status_badge(res_text)
-        
+
         clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
-        st.markdown(clean_img_report)
         
+        # تغليف تقرير الصورة بقالب RTL
+        st.markdown(f'<div class="report-container">{clean_img_report}</div>', unsafe_allow_html=True)
+
         # ظهور زر "فحص صورة جديدة" أسفل النتيجة حصراً
         if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
             st.session_state.image_result = None
