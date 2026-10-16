@@ -35,4 +35,22 @@ except Exception as e:
 
 groq_client = Groq(api_key=groq_key)
 
-def analyze_image
+def analyze_image_with_fallback(image, prompt):
+    last_error = None
+    for key in GEMINI_KEYS:
+        try:
+            genai.configure(api_key=key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content([prompt, image])
+            return response.text
+        except Exception as e:
+            last_error = e
+            continue
+    raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini. الخطأ الأخير: {last_error}")
+
+with st.sidebar:
+    st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=55)
+    st.title("META SCAN")
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    menu_option = st.radio(
