@@ -341,7 +341,7 @@ if menu_option == "الرئيسية":
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
-    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
+    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص المنشور هنا", key=dynamic_text_key, label_visibility="collapsed")
 
     # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع سُمك بارز 700 وحجم 0.92rem
     col_right, col_left = st.columns(2)
