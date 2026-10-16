@@ -155,11 +155,26 @@ def analyze_image_with_gemini_rotation(image, prompt):
     for api_key in gemini_keys:
         try:
             genai.configure(api_key=api_key)
-            # استخدام أحدث نموذج موحد للرؤية والنصوص من جوجل
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content([image, prompt])
+            
+            # قائمة النماذج المرشحة للبحث التلقائي عما هو متاح ومفعل على المفتاح
+            candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision', 'gemini-pro']
+            
+            response = None
+            success_model = None
+            
+            for model_name in candidate_models:
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content([image, prompt])
+                    if response and response.text:
+                        success_model = model_name
+                        break
+                except Exception:
+                    continue
+            
             if response and response.text:
                 return response.text
+                
         except Exception as e:
             last_error = str(e)
             if "429" in str(e) or "ResourceExhausted" in str(e):
@@ -167,7 +182,7 @@ def analyze_image_with_gemini_rotation(image, prompt):
             else:
                 continue
                 
-    raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح المتاحة: {last_error}")
+    raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح والموديلات المتاحة: {last_error}")
 
 menu_option = st.selectbox(
     "اختر القسم:",
