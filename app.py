@@ -137,32 +137,31 @@ except Exception as e:
 
 groq_client = Groq(api_key=groq_key)
 
-def analyze_image_with_groq_text(image, prompt):
-    # تحويل الصورة إلى بايتات ووصف تفصيلي لخصائصها المرئية لضمان توليد تقرير وافي
+def analyze_image_with_qwen(image, prompt):
+    # تحويل الصورة إلى base64 لترسل إلى نموذج Qwen للرؤية عبر Groq
     buffered = BytesIO()
     image.save(buffered, format="JPEG")
-    img_bytes = buffered.getvalue()
-    
-    img_width, img_height = image.size
-    
-    analysis_prompt = f"""
-    أنت خبير محترف في سياسات وإعلانات منصات Meta (فيس بوك وانستغرام).
-    المستخدم قام بررفع تصميم إعلاني أبعاده {img_width}×{img_height} بكسل.
-    بناءً على المعايير الصارمة لإعلانات Meta، قم بإنشاء تقرير فحص تفصيلي يغطي النقاط التالية:
-    1. تقييم محتوى التصميم وإمكانية تعرضه للحظر أو القيود.
-    2. معايير النصوص الظاهرة في الصورة (نسبة النص، وضوحه، والكلمات الحساسة).
-    3. التوصيات والبدائل الفنية المطلوبة لضمان قبول الإعلان بنسبة 100%.
-    اكتب التقرير بشكل احترافي ومرتب ومنسق باللغة العربية.
-    """
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    image_url = f"data:image/jpeg;base64,{img_str}"
     
     completion = groq_client.chat.completions.create(
-        model="openai/gpt-oss-20b",
+        model="qwen/qwen3.8-27b",  # نموذج Qwen المتعدد الوسائط والمدعوم للرؤية على Groq
         messages=[
-            {"role": "system", "content": "أنت مستشار وخبير معتمد لسياسات إعلانات Meta الرقمية."},
-            {"role": "user", "content": analysis_prompt}
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_url
+                        }
+                    }
+                ]
+            }
         ],
         temperature=0.3,
-        max_tokens=1500
+        max_tokens=1024
     )
     return completion.choices[0].message.content
 
@@ -223,10 +222,11 @@ if menu_option == "الرئيسية":
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
         if btn_image:
-            with st.spinner("جاري تحليل وفحص عناصر التصميم بدقة..."):
+            with st.spinner("جاري فحص وتحليل الصورة عبر نظام Qwen الذكي..."):
                 try:
-                    res_text = analyze_image_with_groq_text(image, "فحص تصميم الإعلان")
-                    st.success("✅ تم فحص التصميم وإصدار التقرير بنجاح!")
+                    prompt = "أنت خبير فحص سياسات إعلانات Meta. قم بتحليل هذه الصورة بدقة شديدة، اذكر ما تراه في الصورة، وهل تحتوي على أشخاص أو رموز أو نصوص قدالف سياسات Meta أو تؤدي للحظر، واقترح تعديلات لتجنب الحظر."
+                    res_text = analyze_image_with_qwen(image, prompt)
+                    st.success("✅ تم تحليل الصورة بنجاح عبر نموذج Qwen!")
                     st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
@@ -289,7 +289,7 @@ elif menu_option == "عن التطبيق":
 
 elif menu_option == "راسل التطبيق":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=Test if 'Test' in globals() else True)
     st.write("يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:\n\n📧 **sakhrs545@gmail.com**")
     st.markdown('</div>', unsafe_allow_html=True)
 
