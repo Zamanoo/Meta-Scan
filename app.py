@@ -127,7 +127,7 @@ try:
         st.secrets["GEMINI_KEY_4"]
     ]
 except Exception as e:
-    st.error("⚠️ تنبيه أمني: لم يتم العثور على المفاتيح السرية في إعدادات المنصة (Secrets). يرجى إضافتها ليعمل التطبيق بشكل صحيح.")
+    st.error("⚠️ تنبيه أمني: لم يتم العثور على المفاتيح السرية في إعدادات المنصة (Secrets).")
     st.stop()
 
 groq_client = Groq(api_key=groq_key)
@@ -143,7 +143,7 @@ def analyze_image_with_fallback(image, prompt):
         except Exception as e:
             last_error = e
             continue
-    raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini المتاحة. الخطأ الأخير: {last_error}")
+    raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini. الخطأ الأخير: {last_error}")
 
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=55)
@@ -177,6 +177,73 @@ if menu_option == "الرئيسية":
 
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown("### ✍️ فحص نصوص المنشور")
-    post_content = st.text_area("نص المنشور:", height=120, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area")
+    
+    post_content = st.text_area(
+        "نص المنشور:", 
+        height=120, 
+        placeholder="اكتب نص الإعلان أو المنشور هنا...", 
+        key="text_input_area"
+    )
 
-    if st.button("🔍 ابدأ فحص النص العميق", key="btn_text_scan
+    btn_text = st.button("🔍 ابدأ فحص النص العميق", key="btn_text_scan")
+
+    if btn_text:
+        if not post_content.strip():
+            st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
+        else:
+            found_local_words = [
+                w for words in SUSPICIOUS_KEYWORDS.values() 
+                for w in words if w in post_content
+            ]
+            
+            with st.spinner("⏳ جاري التحليل العميق للسياق بواسطة Llama 3.1..."):
+                try:
+                    system_prompt = (
+                        "أنت خبير محترف في سياسات وإعلانات منصات Meta. "
+                        "قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، "
+                        "وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
+                    )
+                    completion = groq_client.chat.completions.create(
+                        model="llama-3.1-8b-instant",
+                        messages=[
+                            {"role": "system", "content": system_prompt}, 
+                            {"role": "user", "content": post_content}
+                        ],
+                        temperature=0.3,
+                        max_tokens=1024
+                    )
+                    
+                    st.success("✅ تم فحص النص بنجاح!")
+                    
+                    if found_local_words:
+                        st.markdown(
+                            f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> '
+                            f'تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', 
+                            unsafe_allow_html=True
+                        )
+                    
+                    st.markdown("### 📊 تقرير تحليل النص:")
+                    st.markdown(completion.choices[0].message.content)
+                except Exception as e:
+                    st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-box">', unsafe_allow_html=True)
+    st.markdown("### 🖼️ فحص صور المنشور")
+    
+    uploaded_image = st.file_uploader(
+        "اختر ملف الصورة (PNG, JPG, JPEG):", 
+        type=["png", "jpg", "jpeg"], 
+        key="image_upload_area"
+    )
+
+    if uploaded_image:
+        image = Image.open(uploaded_image)
+        st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
+        
+        btn_image = st.button("🔍 ابدأ فحص الصورة الذكي", key="btn_image_scan")
+        if btn_image:
+            with st.spinner("⏳ جاري تحليل الصورة والعناصر البصرية عبر Gemini..."):
+                try:
+                    prompt = (
+                        "قم بتحليل هذه الصورة
