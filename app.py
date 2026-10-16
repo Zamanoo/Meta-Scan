@@ -7,10 +7,9 @@
 import streamlit as st
 import os
 from groq import Groq
+import google.generativeai as genai
 from PIL import Image
 from local_filter import SUSPICIOUS_KEYWORDS
-import base64
-from io import BytesIO
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
@@ -129,41 +128,47 @@ html, body, [class*='css'] {
 </style>
 """, unsafe_allow_html=True)
 
+# 1. تهيئة Groq لفحص النصوص
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
+    groq_client = Groq(api_key=groq_key)
 except Exception as e:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
-groq_client = Groq(api_key=groq_key)
+# 2. تهيئة قائمة مفاتيح Gemini لفحص الصور بطريقة التناوب
+gemini_keys = []
+for key_name in ["GEMINI_API_KEY", "GEMINI_KEY", "GEMINI_API_KEY_1", "GEMINI_API_KEY_2", "GEMINI_API_KEY_3"]:
+    if key_name in st.secrets:
+        val = st.secrets[key_name]
+        if isinstance(val, list):
+            gemini_keys.extend(val)
+        elif val and val not in gemini_keys:
+            gemini_keys.append(val)
 
-def analyze_image_with_qwen(image, prompt):
-    # تحويل الصورة إلى base64 لترسل إلى نموذج Qwen للرؤية عبر Groq
-    buffered = BytesIO()
-    image.save(buffered, format="JPEG")
-    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    image_url = f"data:image/jpeg;base64,{img_str}"
+if not gemini_keys:
+    st.error("⚠️ تنبيه أمني: لم يتم العثور على أي مفتاح GEMINI_API_KEY في Secrets لفحص الصور.")
+    st.stop()
+
+def analyze_image_with_gemini_rotation(image, prompt):
+    global gemini_keys
+    last_error = None
     
-    completion = groq_client.chat.completions.create(
-        model="qwen/qwen3.8-27b",  # نموذج Qwen المتعدد الوسائط للرؤية على Groq
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": image_url
-                        }
-                    }
-                ]
-            }
-        ],
-        temperature=0.3,
-        max_tokens=800  # تم تخفيضه ليتوافق مع حدود الـ OTPM في الخطة المجانية (أقل من 1000)
-    )
-    return completion.choices[0].message.content
+    for api_key in gemini_keys:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content([image, prompt])
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            last_error = str(e)
+            if "429" in str(e) or "ResourceExhausted" in str(e):
+                continue
+            else:
+                continue
+                
+    raise Exception(f"تعذر معالجة الصورة بسبب نفاد حصة المفاتيح المتاحة: {last_error}")
 
 menu_option = st.selectbox(
     "اختر القسم:",
@@ -181,7 +186,7 @@ menu_option = st.selectbox(
 if menu_option == "الرئيسية":
     st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
 
-    # 1. قسم فحص نصوص المنشور
+    # 1. قسم فحص نصوص المنشور (عبر Groq)
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
     
@@ -193,7 +198,7 @@ if menu_option == "الرئيسية":
             st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
         else:
             found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
-            with st.spinner("جاري التحليل العميق للسياق..."):
+            with st.spinner("جاري التحليل العميق للسياق عبر Groq..."):
                 try:
                     system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
                     completion = groq_client.chat.completions.create(
@@ -202,16 +207,16 @@ if menu_option == "الرئيسية":
                         temperature=0.3, 
                         max_tokens=1024
                     )
-                    st.success("✅ تم فحص النص بنجاح!")
+                    st.success("✅ تم فحص النص بنجاح عبر Groq!")
                     if found_local_words:
                         st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
                     st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
                     st.markdown(completion.choices[0].message.content)
                 except Exception as e:
-                    st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
+                    st.error(f"❌ حدث خطأ أثناء الاتصال بنظام Groq: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور
+    # 2. قسم فحص صور المنشور (عبر Gemini الذكي بالتبديل الآلي)
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
     
@@ -222,12 +227,18 @@ if menu_option == "الرئيسية":
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
         if btn_image:
-            with st.spinner("جاري فحص وتحليل الصورة عبر نظام Qwen الذكي..."):
+            with st.spinner("جاري الفحص البصري العميق والتعرف على الشخصيات والعناصر عبر Gemini..."):
                 try:
-                    prompt = "أنت خبير فحص سياسات إعلانات Meta. قم بتحليل هذه الصورة بدقة شديدة، اذكر ما تراه فيها، وهل تحتوي على أشخاص أو رموز أو نصوص تخالف سياسات Meta أو تؤدي للحظر، واقترح تعديلات لتجنب الحظر."
-                    res_text = analyze_image_with_qwen(image, prompt)
-                    st.success("✅ تم تحليل الصورة بنجاح عبر نموذج Qwen!")
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
+                    image_prompt = (
+                        "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta. "
+                        "قم بتحليل هذه الصورة بدقة مطلقة واستخرج تفاصيلها: "
+                        "1. من هو الشخص أو الشخصيات الموجودة في الصورة وهل هي شخصية عامة أو سياسية أو حساسة أو محظورة؟ "
+                        "2. هل تحتوي الصورة على شعارات، رموز، أسلحة، أو نصوص تخالف سياسات Meta وتؤدي لحظر الحساب؟ "
+                        "3. قدم تقييماً تفصيلياً لمدى أمان استخدام هذه الصورة في إعلان ممول مع اقتراح البدائل والتعديلات اللازمة."
+                    )
+                    res_text = analyze_image_with_gemini_rotation(image, image_prompt)
+                    st.success("✅ تم الفحص البصري وإصدار التقرير بدقة عالية!")
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص الصورة والشخصيات:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
