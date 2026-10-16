@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتوحيد محاذاة عناصر الأزرار تماماً
+# CSS موحد للثيم الداكن وتوحيد محاذاة أزرار الأعمدة أفقياً تماماً
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,28 +101,30 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* تنسيق أزرار Streamlit الأخرى المتبقية (مثل فحص جديد) */
+/* توحيد خصائص وارتفاع الأزرار تماماً لتكون على خط أفقي واحد بدون فروقات */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
     color: #ffffff !important;
     font-weight: bold !important;
     border-radius: 8px !important;
-    padding: 10px !important;
+    padding: 8px 10px !important;
     border: none !important;
     font-size: 0.95rem !important;
     margin-top: 0px !important;
+    min-height: 42px !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
 }
 
-/* ضبط تباعد الأعمدة */
+/* محاذاة بلوك الأعمدة لمنع أي انزياح رأسي */
 [data-testid="stHorizontalBlock"] {
     display: flex !important;
     flex-direction: row !important;
     gap: 8px !important;
     direction: rtl !important;
+    align-items: center !important;
 }
 [data-testid="stHorizontalBlock"] > div {
     flex: 1 !important;
@@ -218,8 +220,6 @@ if "image_result" not in st.session_state:
     st.session_state.image_result = None
 if "text_counter" not in st.session_state:
     st.session_state.text_counter = 0
-if "trigger_text_scan" not in st.session_state:
-    st.session_state.trigger_text_scan = False
 
 # 1. تهيئة Groq لفحص النصوص
 try:
@@ -339,92 +339,43 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # استخدام أعمدة متساوية، وكلا الزرين مصممان بـ HTML/CSS موحد تماماً ليقعا على خط أفقي واحد بلا أي فروقات
-    col_right, col_left = st.columns(2)
-    
-    with col_right:
-        # زر الفحص عبر HTML ليتطابق مع زر النسخ تماماً في الارتفاع والمحاذاة
-        scan_clicked = st.components.v1.html("""
-        <button id="scan-btn" style="
-            width: 100%;
-            height: 44px;
-            background-color: #0068c4;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 0px 10px;
-            border: none;
-            font-size: 0.95rem;
-            cursor: pointer;
-            margin-top: 0px;
-            text-align: center;
-            font-family: 'Cairo', sans-serif;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'"
-          onclick="window.parent.document.dispatchEvent(new CustomEvent('trigger_scan'))">
-            🔍 افحص نص المنشور
-        </button>
+    # إضافة معرف فريد لحقل الإدخال عبر JS لضمان سهولة الوصول إليه للنسخ
+    st.components.v1.html("""
         <script>
-            // ربط ضغطة زر الفحص بإعادة تحميل بايثون مع الإشارة للفحص
-            const btn = document.getElementById('scan-btn');
-            btn.addEventListener('click', () => {
-                setTimeout(() => {
-                    const stButton = window.parent.document.querySelector('button[kind="secondary"]');
-                    // محاكاة تفاعل آمن
-                }, 100);
-            });
+            const textarea = window.parent.document.querySelector('textarea');
+            if (textarea) {
+                textarea.id = 'post-textarea-main';
+            }
         </script>
-        """, height=50, scrolling=False)
+    """, height=0)
 
-        # بديل عملي ومضمون: زر Streamlit مخفي يتم تفعيله أو نعتمد الزر البرمجي
-        # لتجنب تعقيد تمرير الأحداث، سنستعمل طريقة Streamlit الأصلية ولكن بتنسيق محاذٍ تماماً عبر كلاس موحد:
-        # (بما أننا نريد توحيد الشكل، سنستخدم st.button ولكن مدمجاً بـ CSS موحد للارتفاع)
-        pass
-
-    # عذراً يا صخر، لكي نضمن أبسط وأدق طريقة دون تعقيد الأحداث، سنستخدم زرين HTML متطابقين تماماً في الكود البرمجي (أحدهما للفحص ويرسل النموذج، والآخر للنسخ):
-    
-    # سنعيد كتابة الأزرار داخل حاوية أعمدة نظيفة وموحدة:
+    # توزيع الأعمدة بشكل متساوٍ (اليمين للفحص، اليسار للنسخ)
     col_right, col_left = st.columns(2)
     
     with col_right:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
+        # زر النسخ البرمجي مع تشغيل جافاسكريبت للنسخ الفوري
+        btn_copy = st.button("📋 نسخ النص", key="btn_text_copy_native")
+
+    # تنفيذ النسخ عند الضغط على زر نسخ النص البرمجي
+    if btn_copy:
         st.components.v1.html("""
-        <button onclick="
-            const textarea = window.parent.document.querySelector('textarea');
-            if (textarea && textarea.value.trim() !== '') {
-                navigator.clipboard.writeText(textarea.value).then(() => {
-                    alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
-                });
-            } else {
-                alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
-            }
-        " style="
-            width: 100%;
-            height: 38px;
-            background-color: #0068c4;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 0px 10px;
-            border: none;
-            font-size: 0.95rem;
-            cursor: pointer;
-            margin-top: 2px;
-            text-align: center;
-            font-family: 'Cairo', sans-serif;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
-            📋 نسخ النص
-        </button>
-        """, height=45, scrolling=False)
+            <script>
+                const textarea = window.parent.document.querySelector('#post-textarea-main') || 
+                                 window.parent.document.querySelector('textarea');
+                if (textarea && textarea.value.trim() !== '') {
+                    navigator.clipboard.writeText(textarea.value).then(() => {
+                        alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
+                    }).catch(err => {
+                        console.error('Copy failed:', err);
+                    });
+                } else {
+                    alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
+                }
+            </script>
+        """, height=0)
 
     if btn_text:
         if not post_content.strip():
