@@ -160,11 +160,13 @@ html, body, [class*='css'] {
 </style>
 """, unsafe_allow_html=True)
 
-# تهيئة إدارة الحالة (Session State)
+# تهيئة إدارة الحالة (Session State) بما فيها محتوى صندوق النص
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
     st.session_state.image_result = None
+if "post_text_input" not in st.session_state:
+    st.session_state.post_text_input = ""
 
 # 1. تهيئة Groq لفحص النصوص
 try:
@@ -258,7 +260,16 @@ if menu_option == "الرئيسية":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
     
-    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area", label_visibility="collapsed")
+    # ربط حقل النص بحالة الجلسة لضمان تفريغه تماماً عند الضغط على فحص جديد
+    post_content = st.text_area(
+        "نص المنشور:", 
+        height=80, 
+        placeholder="اكتب نص الإعلان أو المنشور هنا...", 
+        value=st.session_state.post_text_input,
+        key="text_input_area", 
+        label_visibility="collapsed"
+    )
+    st.session_state.post_text_input = post_content
     
     btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
 
@@ -308,9 +319,10 @@ if menu_option == "الرئيسية":
         clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
         st.markdown(clean_report)
         
-        # ظهور زر "فحص جديد" أسفل النتيجة حصراً
+        # ظهور زر "فحص جديد" أسفل النتيجة وتفريغ النص والصندوق بالكامل
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
+            st.session_state.post_text_input = ""
             st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
