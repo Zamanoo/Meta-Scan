@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS مصمم لتنسيق إخلاء المسؤولية وكافة عناصر التطبيق
+# CSS مصمم لتنسيق إخلاء المسؤولية وإلغاء الفراغات العلوية
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -26,7 +26,7 @@ html, body, [class*='css'] {
 
 .block-container {
     padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    padding-bottom: 0.5rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
 }
@@ -78,31 +78,24 @@ html, body, [class*='css'] {
     margin-bottom: 10px;
 }
 
-.custom-divider-dark {
-    border: none;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.1);
-    margin: 8px 0;
-}
-
-/* صندوق إخلاء المسؤولية المنسق */
+/* صندوق إخلاء المسؤولية المنسق والمرفوع للأعلى بدون فراغات */
 .disclaimer-box {
     background-color: rgba(30, 41, 59, 0.7);
     border-right: 4px solid #f59e0b;
-    padding: 10px 12px;
+    padding: 8px 12px;
     border-radius: 6px;
-    margin-top: 10px;
-    margin-bottom: 8px;
+    margin-top: 2px;
+    margin-bottom: 6px;
     font-size: 0.82rem;
     color: #cbd5e1;
     direction: rtl;
     text-align: right;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 .disclaimer-title {
     font-weight: bold;
     color: #fbbf24;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     font-size: 0.85rem;
 }
 
@@ -289,9 +282,7 @@ elif menu_option == "راسل التطبيق":
     st.write("يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:\n\n📧 **sakhrs545@gmail.com**")
     st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<hr class="custom-divider-dark">', unsafe_allow_html=True)
-
-# عبارة إخلاء المسؤولية المطلوبة قبل الحقوق
+# عبارة إخلاء المسؤولية المطلوبة متصلة مباشرة وبدون أشرطة فاصلة أو مسافات كبيرة
 st.markdown("""
 <div class="disclaimer-box">
     <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
@@ -299,4 +290,4 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
