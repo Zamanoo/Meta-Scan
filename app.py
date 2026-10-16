@@ -136,18 +136,16 @@ except Exception as e:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
-# 2. تهيئة قائمة مفاتيح Gemini لفحص الصور بطريقة التناوب
+# 2. التقاط جميع مفاتيح Gemini تلقائياً بغض النظر عن الأرقام أو الأسماء
 gemini_keys = []
-for key_name in ["GEMINI_API_KEY", "GEMINI_KEY", "GEMINI_API_KEY_1", "GEMINI_API_KEY_2", "GEMINI_API_KEY_3"]:
-    if key_name in st.secrets:
-        val = st.secrets[key_name]
-        if isinstance(val, list):
-            gemini_keys.extend(val)
-        elif val and val not in gemini_keys:
-            gemini_keys.append(val)
+for k in st.secrets.keys():
+    if "GEMINI" in k.upper():
+        val = st.secrets[k]
+        if isinstance(val, str) and val.strip():
+            gemini_keys.append(val.strip())
 
 if not gemini_keys:
-    st.error("⚠️ تنبيه أمني: لم يتم العثور على أي مفتاح GEMINI_API_KEY في Secrets لفحص الصور.")
+    st.error("⚠️ تنبيه أمني: لم يتم العثور على أي مفتاح GEMINI في إعدادات المنصة (Secrets).")
     st.stop()
 
 def analyze_image_with_gemini_rotation(image, prompt):
