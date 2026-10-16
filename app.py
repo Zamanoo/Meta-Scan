@@ -181,9 +181,9 @@ if menu_option == "الرئيسية":
             with st.spinner("جاري التحليل العميق للسياق..."):
                 try:
                     system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
-                    # تم التحديث إلى النموذج النشط والمضمون في منصة Groq
+                    # تم التحديث إلى النموذج النشط الحالي
                     completion = groq_client.chat.completions.create(
-                        model="llama-3.3-70b-versatile", 
+                        model="openai/gpt-oss-20b", 
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], 
                         temperature=0.3, 
                         max_tokens=1024
