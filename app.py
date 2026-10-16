@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتوحيد حجم وسُمك خط جميع الأزرار ليكون 0.92rem و Bold بارز
+# CSS موحد للثيم الداكن وتخصيص حجم الخط الفرعي في الـ main-header
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -55,11 +55,13 @@ html, body, [class*='css'] {
     text-align: center !important;
     color: #ffffff !important;
 }
+/* تكبير وتوضيح النص الفرعي في الهيدر الرئيسي فقط */
 .main-header p {
-    font-size: 0.8rem;
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
     margin: 0;
     text-align: center !important;
-    color: #e2e8f0 !important;
+    color: #f8fafc !important;
 }
 
 .section-box {
@@ -332,7 +334,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>نظام فحص ذكي لتجنب قيود وحظر منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيود والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
