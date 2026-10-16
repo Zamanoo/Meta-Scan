@@ -136,7 +136,7 @@ except Exception as e:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
-# 2. التقاط جميع مفاتيح Gemini تلقائياً بغض النظر عن الأرقام أو الأسماء
+# 2. التقاط جميع مفاتيح Gemini تلقائياً
 gemini_keys = []
 for k in st.secrets.keys():
     if "GEMINI" in k.upper():
@@ -155,7 +155,8 @@ def analyze_image_with_gemini_rotation(image, prompt):
     for api_key in gemini_keys:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # استخدام نموذج gemini-pro-vision المخصص والمدعوم للرؤية وتحليل الصور
+            model = genai.GenerativeModel('gemini-pro-vision')
             response = model.generate_content([image, prompt])
             if response and response.text:
                 return response.text
@@ -166,7 +167,7 @@ def analyze_image_with_gemini_rotation(image, prompt):
             else:
                 continue
                 
-    raise Exception(f"تعذر معالجة الصورة بسبب نفاد حصة المفاتيح المتاحة: {last_error}")
+    raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح المتاحة: {last_error}")
 
 menu_option = st.selectbox(
     "اختر القسم:",
