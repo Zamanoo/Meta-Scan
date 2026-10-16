@@ -142,8 +142,8 @@ def analyze_image_with_fallback(image, prompt):
     for key in GEMINI_KEYS:
         try:
             genai.configure(api_key=key)
-            # تم التحديث إلى النموذج النشط والحديث لفحص الصور
-            model = genai.GenerativeModel('gemini-2.0-flash')
+            # تم التحديث إلى النموذج الأحدث والنشط رسمياً من Google
+            model = genai.GenerativeModel('gemini-2.5-flash')
             response = model.generate_content([prompt, image])
             return response.text
         except Exception as e:
