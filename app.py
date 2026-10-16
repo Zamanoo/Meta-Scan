@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وفرض تجاور الأزرار في صف واحد (Flexbox) بدون الالتفاف للأسفل
+# CSS موحد للثيم الداكن وتمديد الأعمدة لتصل الأزرار للحواف تماماً
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,7 +101,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* تنسيق الأزرار العام */
+/* تنسيق الأزرار لتغطية كامل الحواف للأعمدة */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -117,15 +117,15 @@ html, body, [class*='css'] {
     background-color: #004d99 !important;
 }
 
-/* أجبار الأعمدة على البقاء بجانب بعضها أفقيًا في جميع الأجهزة */
+/* ضبط الهوامش بين الأعمدة لتكون متلاصقة نحو الحواف */
 [data-testid="stHorizontalBlock"] {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 8px !important;
+    gap: 6px !important;
     direction: rtl !important;
 }
 [data-testid="stHorizontalBlock"] > div {
+    flex: 1 !important;
     min-width: 0 !important;
 }
 
@@ -337,30 +337,41 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # تقسيم المساحة بنسبة 70% لزر الفحص (يمين) و 30% لزر النسخ (يسار)
-    col_right, col_left = st.columns([0.7, 0.3])
+    # حقن معرف برمجي (ID) فريد على عنصر الtextarea لضمان التقاط جافاسكريبت له بدقة مطلقة
+    st.components.v1.html(f"""
+        <script>
+            const textarea = window.parent.document.querySelector('textarea[aria-label="نص المنشور:"]') || 
+                             window.parent.document.querySelector('textarea');
+            if (textarea) {{
+                textarea.id = 'target-post-textarea';
+            }}
+        </script>
+    """, height=0)
+
+    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر النسخ لتصل الأزرار للحواف تماماً
+    col_right, col_left = st.columns(2)
     
     with col_right:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
-        btn_copy = st.button("📋 نسخ", key="btn_text_copy")
+        btn_copy = st.button("📋 نسخ النص", key="btn_text_copy")
 
-    # تنفيذ جافاسكريبت لنسخ النص من مربع الإدخال
+    # جافاسكريبت لنسخ النص المكتوب فوراً عند الضغط على زر النسخ
     if btn_copy:
-        st.components.v1.html(f"""
+        st.components.v1.html("""
             <script>
-                const textarea = window.parent.document.querySelector('textarea[aria-label="نص المنشور:"]') || 
+                const textarea = window.parent.document.querySelector('#target-post-textarea') || 
                                  window.parent.document.querySelector('textarea');
-                if (textarea && textarea.value.trim() !== '') {{
-                    navigator.clipboard.writeText(textarea.value).then(() => {{
-                        alert('✅ تم نسخ النص بنجاح!');
-                    }}).catch(err => {{
+                if (textarea && textarea.value.trim() !== '') {
+                    navigator.clipboard.writeText(textarea.value).then(() => {
+                        alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
+                    }).catch(err => {
                         console.error('Failed to copy: ', err);
-                    }});
-                }} else {{
-                    alert('⚠️ لا يوجد نص لنسخه!');
-                }}
+                    });
+                } else {
+                    alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
+                }
             </script>
         """, height=0)
 
