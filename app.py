@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS مصمم لتنسيق إخلاء المسؤولية وإلغاء الفراغات العلوية
+# CSS تكيفي محترف يدعم وضع النهار (Light) ووضع الليل (Dark) تلقائياً
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -22,6 +22,30 @@ html, body, [class*='css'] {
     font-family: 'Cairo', sans-serif;
     direction: rtl;
     text-align: right;
+}
+
+/* 1. المتغيرات الافتراضية - وضع النهار (Light Mode) */
+:root {
+    --bg-card: #f8f9fa;
+    --border-card: #e2e8f0;
+    --text-title: #0f172a;
+    --text-body: #334155;
+    --disclaimer-bg: #f1f5f9;
+    --disclaimer-border: #d97706;
+    --disclaimer-text: #475569;
+}
+
+/* 2. التكييف التلقائي مع وضع الليل (Dark Mode) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-card: #1e293b;
+        --border-card: rgba(255, 255, 255, 0.1);
+        --text-title: #ffffff;
+        --text-body: #cbd5e1;
+        --disclaimer-bg: rgba(30, 41, 59, 0.7);
+        --disclaimer-border: #f59e0b;
+        --disclaimer-text: #cbd5e1;
+    }
 }
 
 .block-container {
@@ -52,59 +76,60 @@ html, body, [class*='css'] {
     font-size: 1.4rem;
     margin-bottom: 4px;
     text-align: center;
-    color: #ffffff;
+    color: #ffffff !important;
 }
 .main-header p {
     font-size: 0.8rem;
     margin: 0;
     text-align: center;
-    color: #e2e8f0;
+    color: #e2e8f0 !important;
 }
 
+/* عناوين الأقسام - تتكيف تلقائياً بين الأبيض والكحلي الداكن */
 .section-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #ffffff !important;
+    color: var(--text-title) !important;
     margin-bottom: 8px;
     direction: rtl;
     text-align: right;
 }
 
+/* البطاقات - تتكيف خلفياتها وإطاراتها حسب ثيم النظام */
 .section-box {
-    background-color: #1e293b;
+    background-color: var(--bg-card);
     padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 5px;
+    border: 1px solid var(--border-card);
+    margin-bottom: 10px;
 }
 
-
-
-/* صندوق إخلاء المسؤولية المنسق والمرفوع للأعلى بدون فراغات */
+/* صندوق إخلاء المسؤولية التكيفي */
 .disclaimer-box {
-    background-color: rgba(30, 41, 59, 0.7);
-    border-right: 4px solid #f59e0b;
+    background-color: var(--disclaimer-bg);
+    border-right: 4px solid var(--disclaimer-border);
     padding: 8px 12px;
     border-radius: 6px;
     margin-top: 2px;
     margin-bottom: 6px;
     font-size: 0.82rem;
-    color: #cbd5e1;
+    color: var(--disclaimer-text);
     direction: rtl;
     text-align: right;
     line-height: 1.4;
 }
 .disclaimer-title {
     font-weight: bold;
-    color: #fbbf24;
+    color: var(--disclaimer-border);
     margin-bottom: 2px;
     font-size: 0.85rem;
 }
 
+/* توحيد الأزرار بلون أزرق ثابت ممتاز لكل الأوضاع */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
-    color: white !important;
+    color: #ffffff !important;
     font-weight: bold !important;
     border-radius: 8px !important;
     padding: 10px !important;
@@ -127,14 +152,6 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
     direction: rtl;
     text-align: right;
-}
-
-.app-version {
-    text-align: center;
-    color: #94a3b8;
-    font-size: 0.8rem;
-    font-weight: bold;
-    padding-top: 2px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -175,7 +192,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب قيود وحظر منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -196,7 +213,7 @@ if menu_option == "الرئيسية":
                     st.success("✅ تم فحص النص بنجاح!")
                     if found_local_words:
                         st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='text-align: right;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
                     st.markdown(completion.choices[0].message.content)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
@@ -218,7 +235,7 @@ if menu_option == "الرئيسية":
                     prompt = "قم بتحليل هذه الصورة لإعلان تجاري لـ Meta. وضح هل تخالف السياسات وما هي التعديلات المطلوبة على التصميم لضمان قبوله."
                     res_text = analyze_image_with_fallback(image, prompt)
                     st.success("✅ تم تحليل الصورة بنجاح!")
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='text-align: right;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
@@ -284,7 +301,7 @@ elif menu_option == "راسل التطبيق":
     st.write("يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:\n\n📧 **sakhrs545@gmail.com**")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# عبارة إخلاء المسؤولية المطلوبة متصلة مباشرة وبدون أشرطة فاصلة أو مسافات كبيرة
+# عبارة إخلاء المسؤولية
 st.markdown("""
 <div class="disclaimer-box">
     <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
