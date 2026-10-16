@@ -158,20 +158,23 @@ html, body, [class*='css'] {
     color: #f87171 !important;
 }
 
-/* حاوية مخصصة لفرض الاتجاه وتنسيق العناوين داخل التقارير */
+/* حاوية التقارير وتنسيق العناوين البارزة الزرقاء */
 .report-container {
     direction: rtl !important;
     text-align: right !important;
     color: #f8fafc;
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 0.95rem;
 }
-.report-container h3, .report-container h4, .report-container strong {
+.report-title-custom {
+    color: #60a5fa !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    margin-top: 16px !important;
+    margin-bottom: 6px !important;
     direction: rtl !important;
     text-align: right !important;
-    color: #60a5fa !important;
-    margin-top: 14px;
-    margin-bottom: 6px;
-    font-size: 1.05rem;
+    display: block !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -256,6 +259,31 @@ def render_status_badge(text_content):
         </div>
         ''', unsafe_allow_html=True)
 
+def display_formatted_report(raw_text):
+    """دالة معالجة نص التقرير وعرضه بعناوين HTML بارزة ومفصولة تماماً"""
+    clean_text = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_text).strip()
+    
+    # تقسيم النص بناءً على الكلمات المفتاحية للعناوين لضمان ظهورها كعناوين مستقلة ومنسقة
+    parts = re.split(r'(خلاصة الفحص والتقييم العام|التقرير التفصيلي والكلمات الحساسة|البديل الموصى به والمتوافق|فحص الشخصيات والعناصر المرئية|التوصيات والتعديلات المطلوبة)', clean_text)
+    
+    html_output = '<div class="report-container">'
+    for i in range(1, len(parts), 2):
+        title = parts[i].strip()
+        content = parts[i+1].strip() if (i+1) < len(parts) else ""
+        
+        # إضافة رمز تعبيري لكل عنوان حسب محتواه
+        emoji = "📋"
+        if "التفصيلي" in title or "الشخصيات" in title:
+            emoji = "🔍" if "التفصيلي" in title else "👤"
+        elif "البديل" in title or "التوصيات" in title:
+            emoji = "💡"
+            
+        html_output += f'<div class="report-title-custom">{emoji} {title}</div>'
+        html_output += f'<div style="margin-bottom: 12px;">{content}</div>'
+        
+    html_output += '</div>'
+    st.markdown(html_output, unsafe_allow_html=True)
+
 menu_option = st.selectbox(
     "اختر القسم:",
     [
@@ -294,12 +322,12 @@ if menu_option == "الرئيسية":
                         "إذا كان النص كاملاً آمن اكتب في السطر الأول: STATUS: SAFE\n"
                         "إذا كان يحتوي مخاطر وحظر مباشر اكتب في السطر الأول: STATUS: DANGER\n"
                         "إذا كان يحتوي كلمات محتملة للشك اكتب في السطر الأول: STATUS: WARNING\n\n"
-                        "ثم اكتب التقرير بالهيكلية التالية مع استخدام علامة ### بوضوح أمام كل عنوان:\n"
-                        "### 📋 خلاصة الفحص والتقييم العام:\n"
+                        "ثم اكتب التقرير بالهيكلية التالية:\n"
+                        "خلاصة الفحص والتقييم العام:\n"
                         "(ملخص شامل وسريع عن حالة النص للقبول الإعلاني)\n\n"
-                        "### 🔍 التقرير التفصيلي والكلمات الحساسة:\n"
+                        "التقرير التفصيلي والكلمات الحساسة:\n"
                         "(فحص الكلمات الحساسة، السياق، والمخاطر المباشرة أو الخفية)\n\n"
-                        "### 💡 البديل الموصى به والمتوافق:\n"
+                        "البديل الموصى به والمتوافق:\n"
                         "(صياغة بديلة آمنة ومضمونة 100% لتجنب أي رفض إعلاني)"
                     )
 
@@ -315,7 +343,7 @@ if menu_option == "الرئيسية":
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
 
-    # عرض النتائج مع معالجة برمجية تضمن تحويل العناوين إلى شكل بارز تلقائياً
+    # عرض النتائج المعالجة برمجياً
     if st.session_state.text_result:
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
@@ -324,14 +352,7 @@ if menu_option == "الرئيسية":
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
 
-        clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
-        
-        # تصحيح قاطع لضمان تحويل عنوان الخلاصة إلى عنوان بارز برمجياً إذا نسيه النموذج
-        clean_report = re.sub(r'(?m)^(📋)?\s*خلاصة الفحص والتقييم العام[:\s]*', '### 📋 خلاصة الفحص والتقييم العام:\n', clean_report)
-        clean_report = re.sub(r'(?m)^(🔍)?\s*التقرير التفصيلي والكلمات الحساسة[:\s]*', '### 🔍 التقرير التفصيلي والكلمات الحساسة:\n', clean_report)
-        clean_report = re.sub(r'(?m)^(💡)?\s*البديل الموصى به والمتوافق[:\s]*', '### 💡 البديل الموصى به والمتوافق:\n', clean_report)
-
-        st.markdown(f'<div class="report-container">{clean_report}</div>', unsafe_allow_html=True)
+        display_formatted_report(raw_result)
 
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
@@ -361,12 +382,12 @@ if menu_option == "الرئيسية":
                         "إذا كانت الصورة آمنة تماماً: STATUS: SAFE\n"
                         "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
                         "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
-                        "ثم اكتب التقرير بوضوح مع استخدام علامة ### أمام العناوين:\n"
-                        "### 📋 خلاصة الفحص والتقييم العام:\n"
+                        "ثم اكتب التقرير بوضوح:\n"
+                        "خلاصة الفحص والتقييم العام:\n"
                         "(ملخص شامل وسريع عن حالة الصورة للقبول الإعلاني)\n\n"
-                        "### 👤 فحص الشخصيات والعناصر المرئية:\n"
+                        "فحص الشخصيات والعناصر المرئية:\n"
                         "(فحص الوجوه، الشخصيات العامة أو السياسية، الأسلحة، الرموز والشعارات)\n\n"
-                        "### 💡 التوصيات والتعديلات المطلوبة:\n"
+                        "التوصيات والتعديلات المطلوبة:\n"
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
 
@@ -377,19 +398,12 @@ if menu_option == "الرئيسية":
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
-    # عرض نتائج فحص الصورة مع معالجة العناوين البرمجية
+    # عرض نتائج فحص الصورة المعالجة برمجياً
     if st.session_state.image_result:
         res_text = st.session_state.image_result
         render_status_badge(res_text)
 
-        clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
-        
-        # تصحيح قاطع لعناوين تقرير الصور أيضاً
-        clean_img_report = re.sub(r'(?m)^(📋)?\s*خلاصة الفحص والتقييم العام[:\s]*', '### 📋 خلاصة الفحص والتقييم العام:\n', clean_img_report)
-        clean_img_report = re.sub(r'(?m)^(👤)?\s*فحص الشخصيات والعناصر المرئية[:\s]*', '### 👤 فحص الشخصيات والعناصر المرئية:\n', clean_img_report)
-        clean_img_report = re.sub(r'(?m)^(💡)?\s*التوصيات والتعديلات المطلوبة[:\s]*', '### 💡 التوصيات والتعديلات المطلوبة:\n', clean_img_report)
-
-        st.markdown(f'<div class="report-container">{clean_img_report}</div>', unsafe_allow_html=True)
+        display_formatted_report(res_text)
 
         if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
             st.session_state.image_result = None
