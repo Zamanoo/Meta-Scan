@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتخصيص حجم الخط الفرعي في الـ main-header
+# CSS موحد للثيم الداكن، إخفاء شريط أدوات Streamlit بالكامل، وتوحيد تنسيق الأزرار
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -37,7 +37,20 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
+/* إخفاء القائمة الجانبية والشريط العلوي وأدوات Streamlit الافتراضية بالكامل */
 [data-testid="stSidebar"] {
+    display: none !important;
+}
+#MainMenu {
+    visibility: hidden !important;
+}
+header {
+    visibility: hidden !important;
+}
+footer {
+    visibility: hidden !important;
+}
+.stDeployButton {
     display: none !important;
 }
 
@@ -55,7 +68,7 @@ html, body, [class*='css'] {
     text-align: center !important;
     color: #ffffff !important;
 }
-/* تكبير وتوضيح النص الفرعي في الهيدر الرئيسي فقط */
+/* النص الفرعي في الهيدر الرئيسي مخصص ومكبر وواضح */
 .main-header p {
     font-size: 0.98rem !important;
     font-weight: 600 !important;
@@ -334,14 +347,14 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>تطبيق ذكي لفحص النصوص والصور لتجنب قيود منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيود والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
-    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص المنشور هنا", key=dynamic_text_key, label_visibility="collapsed")
+    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
     # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع سُمك بارز 700 وحجم 0.92rem
     col_right, col_left = st.columns(2)
