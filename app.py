@@ -14,8 +14,12 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن، إخفاء شريط الأدوات، وتنسيق الفراغات برقم -0.2rem
+# CSS موحد للثيم الداكن، إخفاء شريط الأدوات، شريط إدارة التطبيق، وتنسيق الفراغات برقم -0.2rem
 st.markdown("""
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0068c4">
+<link rel="apple-touch-icon" href="icon.png">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 
@@ -42,8 +46,11 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء القائمة الجانبية والشريط العلوي وأدوات Streamlit الافتراضية بالكامل */
+/* إخفاء القائمة الجانبية، الشريط العلوي، شريط إدارة التطبيق السفلي، وأدوات Streamlit الافتراضية بالكامل */
 [data-testid="stSidebar"] {
+    display: none !important;
+}
+[data-testid="stStatusWidget"] {
     display: none !important;
 }
 #MainMenu {
