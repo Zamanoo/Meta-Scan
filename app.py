@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتوحيد خط وشكل كافة الأزرار لتكون متطابقة تماماً
+# CSS موحد للثيم الداكن وتوحيد تامة لخصائص ونوع وحجم وسُمك الخط في جميع الأزرار
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,12 +101,12 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* توحيد تنسيق جميع أزرار Streamlit لتتطابق تماماً في الخط والحجم والتصميم مع زر النسخ */
+/* توحيد خط وحجم وسُمك جميع أزرار Streamlit */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
     color: #ffffff !important;
-    font-weight: bold !important;
+    font-weight: 700 !important;
     border-radius: 8px !important;
     padding: 10px !important;
     border: none !important;
@@ -341,7 +341,7 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع هامش -10px للضبط الدقيق
+    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر النسخ بـ HTML مطابق تماماً في الخط والسُمك والحجم
     col_right, col_left = st.columns(2)
     
     with col_right:
@@ -364,7 +364,7 @@ if menu_option == "الرئيسية":
             width: 100%;
             background-color: #0068c4;
             color: white;
-            font-weight: bold;
+            font-weight: 700;
             border-radius: 8px;
             padding: 10px;
             border: none;
