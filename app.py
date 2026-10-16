@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# حل جذري ونهائي لتباين الألوان والعناوين في وضعي النهار والليل
+# CSS محترف ومضمون لضمان وضوح العناوين في جميع الأوضاع (Light/Dark)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -36,6 +36,7 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
+/* إخفاء القائمة الجانبية تماماً لمنع أي تداخل */
 [data-testid="stSidebar"] {
     display: none !important;
 }
@@ -62,62 +63,47 @@ html, body, [class*='css'] {
     color: #e2e8f0 !important;
 }
 
-/* بطاقات الأقسام بتصميم متكيف وواضح */
+/* البطاقات بخلفية داكنة ثابتة ومحددة لضمان وضوح كافة النصوص والعناوين البيضاء في وضع النهار ووضع الليل */
 .section-box {
-    background-color: #f8f9fa;
+    background-color: #1e293b !important;
     padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     margin-bottom: 10px;
 }
 
-/* حل جذري للعناوين: لون كحلي غامق وواضح جداً في وضع النهار */
+/* عناوين الأقسام - لون أبيض ناصع ثابت ومحمي تماماً من تأثيرات خلفية الثيم الفاتح */
 .section-title {
     font-size: 1.1rem !important;
     font-weight: 700 !important;
-    color: #0f172a !important;
+    color: #ffffff !important;
     margin-bottom: 8px;
     direction: rtl;
     text-align: right;
 }
 
-/* تكييف تلقائي كامل عند التحويل لوضع الليل (Dark Mode) */
-@media (prefers-color-scheme: dark) {
-    .section-box {
-        background-color: #1e293b !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    }
-    .section-title {
-        color: #ffffff !important;
-    }
-    .disclaimer-box {
-        background-color: rgba(30, 41, 59, 0.7) !important;
-        color: #cbd5e1 !important;
-    }
-}
-
-/* صندوق إخلاء المسؤولية */
+/* صندوق إخلاء المسؤولية المنسق */
 .disclaimer-box {
-    background-color: #f1f5f9;
-    border-right: 4px solid #d97706;
+    background-color: #1e293b !important;
+    border-right: 4px solid #f59e0b !important;
     padding: 8px 12px;
     border-radius: 6px;
     margin-top: 2px;
     margin-bottom: 6px;
     font-size: 0.82rem;
-    color: #334155;
+    color: #cbd5e1 !important;
     direction: rtl;
     text-align: right;
     line-height: 1.4;
 }
 .disclaimer-title {
     font-weight: bold;
-    color: #b45309;
+    color: #fbbf24 !important;
     margin-bottom: 2px;
     font-size: 0.85rem;
 }
 
-/* توحيد الأزرار */
+/* توحيد وتنسيق الأزرار */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -205,7 +191,7 @@ if menu_option == "الرئيسية":
                     st.success("✅ تم فحص النص بنجاح!")
                     if found_local_words:
                         st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-                    st.markdown("<h4 style='text-align: right;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
                     st.markdown(completion.choices[0].message.content)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
@@ -227,7 +213,7 @@ if menu_option == "الرئيسية":
                     prompt = "قم بتحليل هذه الصورة لإعلان تجاري لـ Meta. وضح هل تخالف السياسات وما هي التعديلات المطلوبة على التصميم لضمان قبوله."
                     res_text = analyze_image_with_fallback(image, prompt)
                     st.success("✅ تم تحليل الصورة بنجاح!")
-                    st.markdown("<h4 style='text-align: right;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
