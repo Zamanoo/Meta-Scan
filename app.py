@@ -15,7 +15,7 @@ st.set_page_config(
     page_title="META SCAN",
     page_icon="🛡️",
     layout="centered",
-    initial_sidebar_state="collapsed"  # إبقاء القائمة مغلقة تماماً لمنع أي تداخل افتراضي
+    initial_sidebar_state="collapsed"
 )
 
 # تنسيق CSS متجاوب كلياً ومخصص لتحويل أزرار القائمة إلى خطوط نحيفة وأنيقة
@@ -31,7 +31,6 @@ st.markdown("""
         direction: rtl;
     }
     
-    /* تحويل خيارات الـ Radio في القائمة الجانبية إلى خطوط عرضية نحيفة ومستطيلات ناعمة غير ضخمة */
     div.row-widget.stRadio > div {
         background-color: transparent;
         gap: 5px;
@@ -76,7 +75,6 @@ st.markdown("""
         border: 1px solid #e9ecef;
         margin-bottom: 15px;
     }
-    /* فواصل بيضاء ونحيفة ونظيفة */
     .custom-divider {
         border: none;
         height: 1px;
@@ -120,7 +118,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# سحب المفاتيح بأمان من إعدادات المنصة (st.secrets)
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
     GEMINI_KEYS = [
@@ -148,9 +145,6 @@ def analyze_image_with_fallback(image, prompt):
             continue
     raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini المتاحة. الخطأ الأخير: {last_error}")
 
-# ==========================================
-# القائمة الجانبية (Sidebar Navigation)
-# ==========================================
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=55)
     st.title("META SCAN")
@@ -167,15 +161,11 @@ with st.sidebar:
             "راسل التطبيق"
         ],
         index=0,
-        label_visibility="collapsed"  # إخفاء العنوان النصي العلوي للقائمة لتبدو أنظف
+        label_visibility="collapsed"
     )
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     st.markdown('<div class="app-version">نسخة v1.0</div>', unsafe_allow_html=True)
-
-# ==========================================
-# عرض المحتوى حسب اختيار المستخدم
-# ==========================================
 
 if menu_option == "الرئيسية":
     st.markdown("""
@@ -185,6 +175,35 @@ if menu_option == "الرئيسية":
         </div>
     """, unsafe_allow_html=True)
 
-    # فحص النصوص
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.markdown("### ✍️ فحص نصوص المن
+    st.markdown("### ✍️ فحص نصوص المنشور")
+    post_content = st.text_area("نص المنشور:", height=120, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area")
+
+    if st.button("🔍 ابدأ فحص النص العميق", key="btn_text_scan"):
+        if not post_content.strip():
+            st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
+        else:
+            found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
+            
+            with st.spinner("⏳ جاري التحليل العميق للسياق بواسطة Llama 3.1..."):
+                try:
+                    system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
+                    completion = groq_client.chat.completions.create(
+                        model="llama-3.1-8b-instant",
+                        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}],
+                        temperature=0.3,
+                        max_tokens=1024
+                    )
+                    
+                    st.success("✅ تم فحص النص بنجاح!")
+                    
+                    if found_local_words:
+                        st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
+                    
+                    st.markdown("### 📊 تقرير تحليل النص:")
+                    st.markdown(completion.choices[0].message.content)
+                except Exception as e:
+                    st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-box
