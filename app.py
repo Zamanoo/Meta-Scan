@@ -160,13 +160,13 @@ html, body, [class*='css'] {
 </style>
 """, unsafe_allow_html=True)
 
-# تهيئة إدارة الحالة (Session State) بما فيها محتوى صندوق النص
+# تهيئة إدارة الحالة (Session State) للتحكم بالمحتوى وتوليد المفاتيح الديناميكية
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
     st.session_state.image_result = None
-if "post_text_input" not in st.session_state:
-    st.session_state.post_text_input = ""
+if "text_counter" not in st.session_state:
+    st.session_state.text_counter = 0
 
 # 1. تهيئة Groq لفحص النصوص
 try:
@@ -260,16 +260,9 @@ if menu_option == "الرئيسية":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
     
-    # ربط حقل النص بحالة الجلسة لضمان تفريغه تماماً عند الضغط على فحص جديد
-    post_content = st.text_area(
-        "نص المنشور:", 
-        height=80, 
-        placeholder="اكتب نص الإعلان أو المنشور هنا...", 
-        value=st.session_state.post_text_input,
-        key="text_input_area", 
-        label_visibility="collapsed"
-    )
-    st.session_state.post_text_input = post_content
+    # استخدام مفتاح ديناميكي يتغير رقمه عند الضغط على فحص جديد لمسح الصندوق تماماً
+    dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
+    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
     
     btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
 
@@ -319,10 +312,10 @@ if menu_option == "الرئيسية":
         clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
         st.markdown(clean_report)
         
-        # ظهور زر "فحص جديد" أسفل النتيجة وتفريغ النص والصندوق بالكامل
+        # ظهور زر "فحص جديد" وتغيير عداد المفتاح لتفريغ الصندوق والنتائج معاً
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
-            st.session_state.post_text_input = ""
+            st.session_state.text_counter += 1
             st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
