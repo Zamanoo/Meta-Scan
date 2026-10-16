@@ -315,7 +315,7 @@ if menu_option == "الرئيسية":
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
 
-    # عرض النتائج ضمن حاوية التقارير المنسقة
+    # عرض النتائج مع معالجة برمجية تضمن تحويل العناوين إلى شكل بارز تلقائياً
     if st.session_state.text_result:
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
@@ -326,6 +326,11 @@ if menu_option == "الرئيسية":
 
         clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
         
+        # تصحيح قاطع لضمان تحويل عنوان الخلاصة إلى عنوان بارز برمجياً إذا نسيه النموذج
+        clean_report = re.sub(r'(?m)^(📋)?\s*خلاصة الفحص والتقييم العام[:\s]*', '### 📋 خلاصة الفحص والتقييم العام:\n', clean_report)
+        clean_report = re.sub(r'(?m)^(🔍)?\s*التقرير التفصيلي والكلمات الحساسة[:\s]*', '### 🔍 التقرير التفصيلي والكلمات الحساسة:\n', clean_report)
+        clean_report = re.sub(r'(?m)^(💡)?\s*البديل الموصى به والمتوافق[:\s]*', '### 💡 البديل الموصى به والمتوافق:\n', clean_report)
+
         st.markdown(f'<div class="report-container">{clean_report}</div>', unsafe_allow_html=True)
 
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
@@ -372,13 +377,18 @@ if menu_option == "الرئيسية":
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
-    # عرض نتائج فحص الصورة ضمن حاوية التقارير المنسقة
+    # عرض نتائج فحص الصورة مع معالجة العناوين البرمجية
     if st.session_state.image_result:
         res_text = st.session_state.image_result
         render_status_badge(res_text)
 
         clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
         
+        # تصحيح قاطع لعناوين تقرير الصور أيضاً
+        clean_img_report = re.sub(r'(?m)^(📋)?\s*خلاصة الفحص والتقييم العام[:\s]*', '### 📋 خلاصة الفحص والتقييم العام:\n', clean_img_report)
+        clean_img_report = re.sub(r'(?m)^(👤)?\s*فحص الشخصيات والعناصر المرئية[:\s]*', '### 👤 فحص الشخصيات والعناصر المرئية:\n', clean_img_report)
+        clean_img_report = re.sub(r'(?m)^(💡)?\s*التوصيات والتعديلات المطلوبة[:\s]*', '### 💡 التوصيات والتعديلات المطلوبة:\n', clean_img_report)
+
         st.markdown(f'<div class="report-container">{clean_img_report}</div>', unsafe_allow_html=True)
 
         if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
