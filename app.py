@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن، إخفاء شريط أدوات Streamlit بالكامل، وتوحيد تنسيق الأزرار
+# CSS موحد للثيم الداكن، إخفاء شريط الأدوات، وتقليل الفراغات الرأسية الكبيرة
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -35,6 +35,11 @@ html, body, [class*='css'] {
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div {
     direction: rtl !important;
     text-align: right !important;
+}
+
+/* تقليل الفراغات الكبيرة (Vertical Spacing) التي تضعها منصة Streamlit تلقائياً تحت العناصر */
+.stElementContainer {
+    margin-bottom: -0.8rem !important;
 }
 
 /* إخفاء القائمة الجانبية والشريط العلوي وأدوات Streamlit الافتراضية بالكامل */
@@ -68,7 +73,6 @@ footer {
     text-align: center !important;
     color: #ffffff !important;
 }
-/* النص الفرعي في الهيدر الرئيسي مخصص ومكبر وواضح */
 .main-header p {
     font-size: 0.98rem !important;
     font-weight: 600 !important;
@@ -116,7 +120,7 @@ footer {
     font-size: 0.85rem;
 }
 
-/* توحيد حجم وسُمك الخط في جميع أزرار Streamlit ليصبح Bold بارز (700) وبحجم 0.92rem */
+/* توحيد حجم وسُمك الخط في جميع أزرار Streamlit ليصبح Bold بارز (700) وبحجم 0.92rem مع تقليل الفراغ السفلي */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -127,6 +131,7 @@ footer {
     border: none !important;
     font-size: 0.92rem !important;
     margin-top: 0px !important;
+    margin-bottom: -5px !important;
     font-family: 'Cairo', sans-serif !important;
     box-sizing: border-box !important;
     text-align: center !important;
