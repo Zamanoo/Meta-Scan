@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS متكيف ومحدث لضمان وضوح العناوين تماماً في وضع النهار والليل
+# CSS محسّن لفرض ألوان صريحة ومضمونة للعناوين حسب الثيم
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -24,12 +24,11 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* 1. المتغيرات الافتراضية - وضع النهار (Light Mode) */
+/* 1. الإعدادات الافتراضية - وضع النهار (Light Mode) */
 :root {
     --bg-card: #f8f9fa;
     --border-card: #e2e8f0;
-    --text-title: #0f172a;
-    --text-body: #334155;
+    --text-title: #0f172a !important; /* لون كحلي داكن جداً وواضح في النهار */
     --disclaimer-bg: #f1f5f9;
     --disclaimer-border: #d97706;
     --disclaimer-text: #475569;
@@ -40,8 +39,7 @@ html, body, [class*='css'] {
     :root {
         --bg-card: #1e293b;
         --border-card: rgba(255, 255, 255, 0.1);
-        --text-title: #ffffff;
-        --text-body: #cbd5e1;
+        --text-title: #ffffff !important; /* لون أبيض ناصع في الليل */
         --disclaimer-bg: rgba(30, 41, 59, 0.7);
         --disclaimer-border: #f59e0b;
         --disclaimer-text: #cbd5e1;
@@ -85,11 +83,11 @@ html, body, [class*='css'] {
     color: #e2e8f0 !important;
 }
 
-/* عناوين الأقسام - تتكيف بوضوح تام بين النهار والليل */
+/* عنوان القسم مع فرض اللون المتكيف بدقة */
 .section-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text-title) !important;
+    color: var(--text-title);
     margin-bottom: 8px;
     direction: rtl;
     text-align: right;
