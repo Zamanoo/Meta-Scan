@@ -337,7 +337,7 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML مع رفع الزر قليلاً (-6px) ليتطابق تماماً مع مستوى زر الفحص
+    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML مع هامش -5px
     col_right, col_left = st.columns(2)
     
     with col_right:
@@ -366,7 +366,7 @@ if menu_option == "الرئيسية":
             border: none;
             font-size: 0.95rem;
             cursor: pointer;
-            margin-top: -6px;
+            margin-top: -5px;
             text-align: center;
             font-family: 'Cairo', sans-serif;
         " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
