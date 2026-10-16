@@ -480,6 +480,16 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # عبارة إخلاء المسؤولية وحقوق النشر تظهر حصرياً في الشاشة الرئيسية وعند نتائج الفحص
+    st.markdown("""
+    <div class="disclaimer-box">
+        <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
+        "هذه النتائج تقديرية مبنية على معايير المجتمع من شركة Meta وليس قرارًا رسميًا من Meta".
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
+
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📖 دليل معايير مجتمع Meta</div>', unsafe_allow_html=True)
@@ -558,13 +568,3 @@ elif menu_option == "راسل التطبيق":
     </div>
     ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
-# عبارة إخلاء المسؤولية
-st.markdown("""
-<div class="disclaimer-box">
-    <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
-    "هذه النتائج تقديرية مبنية على معايير المجتمع من شركة Meta وليس قرارًا رسميًا من Meta".
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
