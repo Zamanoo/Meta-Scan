@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن، إخفاء شريط الأدوات، شريط إدارة التطبيق، وتنسيق الفراغات برقم -0.2rem
+# CSS موحد للثيم الداكن، إخفاء جميع أشرطة وأدوات Streamlit بما فيها شريط إدارة التطبيق
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -46,24 +46,24 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء القائمة الجانبية، الشريط العلوي، شريط إدارة التطبيق السفلي، وأدوات Streamlit الافتراضية بالكامل */
-[data-testid="stSidebar"] {
+/* إخفاء القائمة الجانبية، الشريط العلوي، أدوات Streamlit وشريط "إدارة التطبيق" المضمن بكل الطرق الفعالة */
+[data-testid="stSidebar"],
+[data-testid="stStatusWidget"],
+[data-testid="stDecoration"],
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+#MainMenu,
+header,
+footer,
+.stDeployButton,
+div[class*="StatusWidget"],
+div[class*="viewerBadge"] {
     display: none !important;
-}
-[data-testid="stStatusWidget"] {
-    display: none !important;
-}
-#MainMenu {
     visibility: hidden !important;
-}
-header {
-    visibility: hidden !important;
-}
-footer {
-    visibility: hidden !important;
-}
-.stDeployButton {
-    display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .main-header {
@@ -239,6 +239,15 @@ footer {
     margin-bottom: 6px !important;
 }
 </style>
+
+<script>
+    // سكربت إخفاء شريط إدارة التطبيق فور تحميل الصفحة
+    const hideStatusWidget = () => {
+        const widgets = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], div[class*="StatusWidget"], div[class*="viewerBadge"]');
+        widgets.forEach(w => w.style.display = 'none');
+    };
+    setInterval(hideStatusWidget, 500);
+</script>
 """, unsafe_allow_html=True)
 
 # تهيئة إدارة الحالة (Session State)
