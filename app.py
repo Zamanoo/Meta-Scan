@@ -325,7 +325,28 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
+    # توزيع أزرار التحكيم (فحص على اليمين، نسخ على اليسار)
+    col1, col2 = st.columns(2)
+    with col1:
+        btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
+    with col2:
+        btn_copy = st.button("📋 نسخ النص", key="btn_text_copy")
+
+    # تفعيل جافاسكريبت لنسخ النص الفعلي الموجود في حقل الإدخال فوراً
+    if btn_copy:
+        st.components.v1.html(f"""
+            <script>
+                const textarea = window.parent.document.querySelector('textarea[aria-label="نص المنشور:"]') || 
+                                 window.parent.document.querySelector('textarea');
+                if (textarea) {{
+                    navigator.clipboard.writeText(textarea.value).then(() => {{
+                        alert('✅ تم نسخ النص بنجاح!');
+                    }}).catch(err => {{
+                        console.error('Failed to copy: ', err);
+                    }});
+                }}
+            </script>
+        """, height=0)
 
     if btn_text:
         if not post_content.strip():
