@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد ومستقر للثيم الداكن الدائم والبطاقات التفاعلية والاتجاه العربي الصريح
+# CSS موحد ومستقر للثيم الداكن الدائم والبطاقات التفاعلية وتنسيق العناوين المخرجة
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -158,14 +158,14 @@ html, body, [class*='css'] {
     color: #f87171 !important;
 }
 
-/* حاوية مخصصة لفرض الاتجاه العربي RTL للتقارير المخرجة */
+/* حاوية مخصصة لفرض الاتجاه وتنسيق العناوين داخل التقارير */
 .report-container {
     direction: rtl !important;
     text-align: right !important;
     color: #f8fafc;
     line-height: 1.6;
 }
-.report-container h3 {
+.report-container h3, .report-container h4, .report-container strong {
     direction: rtl !important;
     text-align: right !important;
     color: #60a5fa !important;
@@ -176,7 +176,7 @@ html, body, [class*='css'] {
 </style>
 """, unsafe_allow_html=True)
 
-# تهيئة إدارة الحالة (Session State) للتحكم بالمحتوى وتوليد المفاتيح الديناميكية
+# تهيئة إدارة الحالة (Session State)
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
@@ -276,7 +276,6 @@ if menu_option == "الرئيسية":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
-    # استخدام مفتاح ديناميكي يتغير رقمه عند الضغط على فحص جديد لمسح الصندوق تماماً
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
@@ -295,7 +294,7 @@ if menu_option == "الرئيسية":
                         "إذا كان النص كاملاً آمن اكتب في السطر الأول: STATUS: SAFE\n"
                         "إذا كان يحتوي مخاطر وحظر مباشر اكتب في السطر الأول: STATUS: DANGER\n"
                         "إذا كان يحتوي كلمات محتملة للشك اكتب في السطر الأول: STATUS: WARNING\n\n"
-                        "ثم اكتب التقرير بالهيكلية التالية:\n"
+                        "ثم اكتب التقرير بالهيكلية التالية مع استخدام علامة ### بوضوح أمام كل عنوان:\n"
                         "### 📋 خلاصة الفحص والتقييم العام:\n"
                         "(ملخص شامل وسريع عن حالة النص للقبول الإعلاني)\n\n"
                         "### 🔍 التقرير التفصيلي والكلمات الحساسة:\n"
@@ -316,7 +315,7 @@ if menu_option == "الرئيسية":
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
 
-    # عرض النتائج من اليمين إلى اليسار (RTL)
+    # عرض النتائج ضمن حاوية التقارير المنسقة
     if st.session_state.text_result:
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
@@ -327,10 +326,8 @@ if menu_option == "الرئيسية":
 
         clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
         
-        # تغليف مخرجات التقرير بقالب RTL لضمان المحاذاة الكاملة نحو اليمين
         st.markdown(f'<div class="report-container">{clean_report}</div>', unsafe_allow_html=True)
 
-        # ظهور زر "فحص جديد" وتغيير عداد المفتاح لتفريغ الصندوق والنتائج معاً
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
             st.session_state.text_counter += 1
@@ -359,7 +356,7 @@ if menu_option == "الرئيسية":
                         "إذا كانت الصورة آمنة تماماً: STATUS: SAFE\n"
                         "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
                         "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
-                        "ثم اكتب التقرير بوضوح:\n"
+                        "ثم اكتب التقرير بوضوح مع استخدام علامة ### أمام العناوين:\n"
                         "### 📋 خلاصة الفحص والتقييم العام:\n"
                         "(ملخص شامل وسريع عن حالة الصورة للقبول الإعلاني)\n\n"
                         "### 👤 فحص الشخصيات والعناصر المرئية:\n"
@@ -375,17 +372,15 @@ if menu_option == "الرئيسية":
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
-    # عرض نتائج فحص الصورة من اليمين إلى اليسار (RTL)
+    # عرض نتائج فحص الصورة ضمن حاوية التقارير المنسقة
     if st.session_state.image_result:
         res_text = st.session_state.image_result
         render_status_badge(res_text)
 
         clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
         
-        # تغليف تقرير الصورة بقالب RTL
         st.markdown(f'<div class="report-container">{clean_img_report}</div>', unsafe_allow_html=True)
 
-        # ظهور زر "فحص صورة جديدة" أسفل النتيجة حصراً
         if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
             st.session_state.image_result = None
             st.rerun()
