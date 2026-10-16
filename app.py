@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد ومستقر للثيم الداكن وتصحيح محاذاة القوائم المرقّمة والمنقطة نحو اليمين (RTL)
+# CSS موحد ومستقر مع معالجة وضع الأزرار بجانب بعضها داخل الأعمدة
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,6 +101,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
+/* تنسيق الأزرار العام */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -111,10 +112,15 @@ html, body, [class*='css'] {
     border: none !important;
     font-size: 0.95rem !important;
     margin-top: 6px !important;
-    display: block !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
+}
+
+/* التنسيق الخاص باستجابة الأعمدة والتجاور الأفقي */
+[data-testid="stHorizontalBlock"] {
+    direction: rtl !important;
+    gap: 8px !important;
 }
 
 .local-warning {
@@ -325,28 +331,29 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # إنشاء الأعمدة بترتيب معكوس لتتوافق مع محاذاة RTL في المتصفح:
-    # العمود الأول سيكون على اليسار (زر النسخ)، والعمود الثاني على اليمين (زر الفحص)
-    col_left, col_right = st.columns(2)
+    # تقسيم المساحة بنسبة 70% لزر الفحص (يمين) و 30% لزر النسخ (يسار)
+    col_right, col_left = st.columns([0.7, 0.3])
     
     with col_right:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
-        btn_copy = st.button("📋 نسخ النص", key="btn_text_copy")
+        btn_copy = st.button("📋 نسخ", key="btn_text_copy")
 
-    # تنفيذ جافاسكريبت لنسخ النص الفعلي الموجود في حقل الإدخال فوراً
+    # تنفيذ جافاسكريبت لنسخ النص من مربع الإدخال
     if btn_copy:
         st.components.v1.html(f"""
             <script>
                 const textarea = window.parent.document.querySelector('textarea[aria-label="نص المنشور:"]') || 
                                  window.parent.document.querySelector('textarea');
-                if (textarea) {{
+                if (textarea && textarea.value.trim() !== '') {{
                     navigator.clipboard.writeText(textarea.value).then(() => {{
                         alert('✅ تم نسخ النص بنجاح!');
                     }}).catch(err => {{
                         console.error('Failed to copy: ', err);
                     }});
+                }} else {{
+                    alert('⚠️ لا يوجد نص لنسخه!');
                 }}
             </script>
         """, height=0)
