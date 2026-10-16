@@ -160,6 +160,12 @@ html, body, [class*='css'] {
 </style>
 """, unsafe_allow_html=True)
 
+# تهيئة إدارة الحالة (Session State) لتفعيل زر إعادة الضبط وفحص جديد
+if "text_result" not in st.session_state:
+    st.session_state.text_result = None
+if "image_result" not in st.session_state:
+    st.session_state.image_result = None
+
 # 1. تهيئة Groq لفحص النصوص
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
@@ -253,7 +259,14 @@ if menu_option == "الرئيسية":
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
     
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area", label_visibility="collapsed")
-    btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
+    
+    col_btn1, col_btn2 = st.columns([3, 1])
+    with col_btn1:
+        btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
+    with col_btn2:
+        if st.button("🔄 فحص جديد", key="reset_text_btn"):
+            st.session_state.text_result = None
+            st.rerun()
 
     if btn_text:
         if not post_content.strip():
@@ -264,7 +277,7 @@ if menu_option == "الرئيسية":
                 try:
                     system_prompt = (
                         "أنت خبير محترف في سياسات وإعلانات منصات Meta.\n"
-                        "قم بتحليل النص المدخل بدقة، ويجب أن تتضمن إجابتك التنسيق المالي المباشر التالي في البداية تماماً:\n"
+                        "قم بتحليل النص المدخل بدقة، ويجب أن تتضمن إجابتك التنسيق المباشر التالي في البداية تماماً:\n"
                         "إذا كان النص كاملاً آمن اكتب في السطر الأول: STATUS: SAFE\n"
                         "إذا كان يحتوي مخاطر وحظر مباشر اكتب في السطر الأول: STATUS: DANGER\n"
                         "إذا كان يحتوي كلمات محتملة للشك اكتب في السطر الأول: STATUS: WARNING\n\n"
@@ -284,21 +297,23 @@ if menu_option == "الرئيسية":
                         max_tokens=1024
                     )
                     
-                    raw_result = completion.choices[0].message.content
+                    st.session_state.text_result = completion.choices[0].message.content
                     st.success("✅ تم فحص النص بنجاح!")
-                    
-                    # عرض بطاقة المؤشر البصري
-                    render_status_badge(raw_result)
-                    
-                    if found_local_words:
-                        st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-                    
-                    # تنظيف النص المرجع وعرضه مباشرة بدون عناوين مكررة
-                    clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
-                    st.markdown(clean_report)
-                    
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
+
+    # عرض نتائج فحص النص إذا وجدت مخزنة في الجلسة
+    if st.session_state.text_result:
+        raw_result = st.session_state.text_result
+        render_status_badge(raw_result)
+        
+        found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
+        if found_local_words:
+            st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
+        
+        clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
+        st.markdown(clean_report)
+
     st.markdown('</div>', unsafe_allow_html=True)
 
     # 2. قسم فحص صور المنشور
@@ -310,7 +325,15 @@ if menu_option == "الرئيسية":
     if uploaded_image:
         image = Image.open(uploaded_image)
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
-        btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
+        
+        col_img1, col_img2 = st.columns([3, 1])
+        with col_img1:
+            btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
+        with col_img2:
+            if st.button("🔄 فحص جديد", key="reset_img_btn"):
+                st.session_state.image_result = None
+                st.rerun()
+
         if btn_image:
             with st.spinner("جاري فحص الصورة والتعرف على العناصر..."):
                 try:
@@ -329,20 +352,20 @@ if menu_option == "الرئيسية":
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
                     
-                    res_text = analyze_image_with_gemini_rotation(image, image_prompt)
+                    st.session_state.image_result = analyze_image_with_gemini_rotation(image, image_prompt)
                     st.success("✅ تم الفحص البصري بنجاح!")
-                    
-                    # عرض بطاقة المؤشر البصري للصورة
-                    render_status_badge(res_text)
-                    
-                    # تنظيف التقرير وعرضه مباشرة بدون عناوين مكررة
-                    clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
-                    st.markdown(clean_img_report)
-                    
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
+
+    # عرض نتائج فحص الصورة إذا وجدت مخزنة في الجلسة
+    if st.session_state.image_result:
+        res_text = st.session_state.image_result
+        render_status_badge(res_text)
+        
+        clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
+        st.markdown(clean_img_report)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
