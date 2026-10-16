@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS احترافي يمنع تماماً تسرب عناصر القائمة الجانبية لوسط الشاشة
+# تنسيق CSS نظيف ومخصص للشاشات المحمولة دون أي تداخل في القوائم
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -26,44 +26,9 @@ html, body, [class*='css'] {
     direction: rtl;
 }
 
-/* حل جذري: عزل القائمة الجانبية تماماً ومنع ظهور محتوياتها في الصفحة الرئيسية */
-section[data-testid="stSidebar"] {
-    background-color: #0f172a !important;
-    position: fixed !important;
-    top: 0 !important;
-    right: 0 !important;
-    height: 100vh !important;
-    z-index: 999999 !important;
-    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-}
-
-/* تأكيد إخفاء النصوص إذا كانت القائمة مطوية بالكامل على الموبايل */
-section[data-testid="stSidebar"][aria-expanded="false"] {
-    margin-right: -100% !important;
-    transform: translateX(100%) !important;
-}
-
-div.row-widget.stRadio > div {
-    background-color: transparent;
-    gap: 6px;
-    display: flex;
-    flex-direction: column;
-}
-div.row-widget.stRadio label {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    width: 100% !important;
-    display: block !important;
-    font-size: 0.95rem;
-    text-align: right;
-    box-sizing: border-box;
-}
-div.row-widget.stRadio label:hover {
-    background-color: #0068c4 !important;
-    border-color: #0068c4 !important;
+/* إخفاء القائمة الجانبية تماماً لمنع أي تداخل أو تسرب للنصوص */
+[data-testid="stSidebar"] {
+    display: none !important;
 }
 
 .main-header {
@@ -88,12 +53,6 @@ div.row-widget.stRadio label:hover {
     border-radius: 10px;
     border: 1px solid #e9ecef;
     margin-bottom: 15px;
-}
-.custom-divider {
-    border: none;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.3);
-    margin: 12px 0;
 }
 .custom-divider-dark {
     border: none;
@@ -154,18 +113,24 @@ def analyze_image_with_fallback(image, prompt):
             continue
     raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini. الخطأ الأخير: {last_error}")
 
-with st.sidebar:
-    st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=55)
-    st.title("META SCAN")
-    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
-    
-    menu_option = st.radio("القائمة الرئيسية:", ["الرئيسية", "دليل معايير مجتمع Meta", "سياسة الخصوصية", "سياسة المستخدم", "عن التطبيق", "راسل التطبيق"], index=0, label_visibility="collapsed")
-    
-    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
-    st.markdown('<div class="app-version">نسخة v1.0</div>', unsafe_allow_html=True)
+# شريط التنقل العلوي المدمج (بديل القائمة الجانبية لمنع أي تداخل نهائياً)
+st.markdown("### 🛡️ META SCAN")
+menu_option = st.selectbox(
+    "اختر القسم:",
+    [
+        "الرئيسية", 
+        "دليل معايير مجتمع Meta", 
+        "سياسة الخصوصية", 
+        "سياسة المستخدم", 
+        "عن التطبيق", 
+        "راسل التطبيق"
+    ],
+    label_visibility="collapsed"
+)
+st.markdown('<hr class="custom-divider-dark">', unsafe_allow_html=True)
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي المتكامل لفحص النصوص والصور المرئية وتجنب حظر وقيود منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي المتكامل لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown("### ✍️ فحص نصوص المنشور")
