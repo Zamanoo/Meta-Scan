@@ -79,22 +79,6 @@ html, body, [class*='css'] {
 }
 
 
-/* تقليل المسافات العمودية للفواصل */
-[data-testid="stDivider"] {
-    margin-top: 2px !important;
-    margin-bottom: 2px !important;
-    padding: 0 !important;
-}
-
-/* تقليل ارتفاع الخط نفسه */
-[data-testid="stDivider"] hr {
-    margin: 0 !important;
-    height: 1px !important;
-    border: none !important;
-    border-top: 1px solid #1e293b !important;
-}
-
-
 
 /* صندوق إخلاء المسؤولية المنسق والمرفوع للأعلى بدون فراغات */
 .disclaimer-box {
