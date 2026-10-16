@@ -13,8 +13,124 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS المحدث لحل مشكلة تسرب القائمة الجانبية لوسط الشاشة
-st.markdown("<style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap'); html, body, [class*='css'] { font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; } .stTextInput, .stTextArea, .stSelectbox { direction: rtl; } [data-testid='stSidebar'] { background-color: #0f172a !important; z-index: 99999 !important; } [data-testid='stSidebar'] > div:first-child { width: 100% !important; } div.row-widget.stRadio > div { background-color: transparent; gap: 6px; display: flex; flex-direction: column; } div.row-widget.stRadio label { background-color: #1e293b !important; color: #ffffff !important; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); width: 100% !important; display: block !important; font-size: 0.95rem; text-align: right; box-sizing: border-box; } div.row-widget.stRadio label:hover { background-color: #0068c4 !important; border-color: #0068c4 !important; } .main-header { background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%); padding: 20px 15px; border-radius: 12px; color: white; text-align: center; margin-bottom: 20px; } .main-header h1 { font-size: 1.8rem; margin-bottom: 8px; } .main-header p { font-size: 0.9rem; margin: 0; } .section-box { background-color: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #e9ecef; margin-bottom: 15px; } .custom-divider { border: none; height: 1px; background-color: rgba(255, 255, 255, 0.3); margin: 12px 0; } .custom-divider-dark { border: none; height: 1px; background-color: #dee2e6; margin: 15px 0; } .stButton>button { width: 100%; background-color: #0068c4; color: white; font-weight: bold; border-radius: 8px; padding: 10px; border: none; } .stButton>button:hover { background-color: #004d99; } .local-warning { background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px 15px; border-radius: 8px; color: #856404; margin-top: 10px; font-size: 0.9rem; } .app-version { text-align: center; color: #94a3b8; font-size: 0.85rem; font-weight: bold; padding-top: 5px; }</style>", unsafe_allow_html=True)
+# CSS احترافي يمنع تماماً تسرب عناصر القائمة الجانبية لوسط الشاشة
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+html, body, [class*='css'] {
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    text-align: right;
+}
+.stTextInput, .stTextArea, .stSelectbox {
+    direction: rtl;
+}
+
+/* حل جذري: عزل القائمة الجانبية تماماً ومنع ظهور محتوياتها في الصفحة الرئيسية */
+section[data-testid="stSidebar"] {
+    background-color: #0f172a !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+}
+
+/* تأكيد إخفاء النصوص إذا كانت القائمة مطوية بالكامل على الموبايل */
+section[data-testid="stSidebar"][aria-expanded="false"] {
+    margin-right: -100% !important;
+    transform: translateX(100%) !important;
+}
+
+div.row-widget.stRadio > div {
+    background-color: transparent;
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
+}
+div.row-widget.stRadio label {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100% !important;
+    display: block !important;
+    font-size: 0.95rem;
+    text-align: right;
+    box-sizing: border-box;
+}
+div.row-widget.stRadio label:hover {
+    background-color: #0068c4 !important;
+    border-color: #0068c4 !important;
+}
+
+.main-header {
+    background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%);
+    padding: 20px 15px;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.main-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+.main-header p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+.section-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+.custom-divider {
+    border: none;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin: 12px 0;
+}
+.custom-divider-dark {
+    border: none;
+    height: 1px;
+    background-color: #dee2e6;
+    margin: 15px 0;
+}
+.stButton>button {
+    width: 100%;
+    background-color: #0068c4;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+}
+.stButton>button:hover {
+    background-color: #004d99;
+}
+.local-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 10px 15px;
+    border-radius: 8px;
+    color: #856404;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+.app-version {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: bold;
+    padding-top: 5px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
@@ -38,7 +154,6 @@ def analyze_image_with_fallback(image, prompt):
             continue
     raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini. الخطأ الأخير: {last_error}")
 
-# وضع كافة أجزاء القائمة داخل كتل متصلة لضمان عزلها عن الصفحة الرئيسية
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=55)
     st.title("META SCAN")
@@ -50,7 +165,7 @@ with st.sidebar:
     st.markdown('<div class="app-version">نسخة v1.0</div>', unsafe_allow_html=True)
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي المتكامل لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي المتكامل لفحص النصوص والصور المرئية وتجنب حظر وقيود منصة ميتا</p></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown("### ✍️ فحص نصوص المنشور")
