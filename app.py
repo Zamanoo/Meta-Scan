@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS محسّن لفرض ألوان صريحة ومضمونة للعناوين حسب الثيم
+# CSS محترف ومضمون لضمان وضوح العناوين في جميع الأوضاع (Light/Dark)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -22,28 +22,6 @@ html, body, [class*='css'] {
     font-family: 'Cairo', sans-serif;
     direction: rtl;
     text-align: right;
-}
-
-/* 1. الإعدادات الافتراضية - وضع النهار (Light Mode) */
-:root {
-    --bg-card: #f8f9fa;
-    --border-card: #e2e8f0;
-    --text-title: #0f172a !important; /* لون كحلي داكن جداً وواضح في النهار */
-    --disclaimer-bg: #f1f5f9;
-    --disclaimer-border: #d97706;
-    --disclaimer-text: #475569;
-}
-
-/* 2. التكييف التلقائي مع وضع الليل (Dark Mode) */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-card: #1e293b;
-        --border-card: rgba(255, 255, 255, 0.1);
-        --text-title: #ffffff !important; /* لون أبيض ناصع في الليل */
-        --disclaimer-bg: rgba(30, 41, 59, 0.7);
-        --disclaimer-border: #f59e0b;
-        --disclaimer-text: #cbd5e1;
-    }
 }
 
 .block-container {
@@ -58,15 +36,17 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
+/* إخفاء القائمة الجانبية تماماً لمنع أي تداخل */
 [data-testid="stSidebar"] {
     display: none !important;
 }
 
+/* الهيدر الرئيسي */
 .main-header {
     background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%);
     padding: 12px 10px;
     border-radius: 10px;
-    color: white;
+    color: #ffffff !important;
     text-align: center;
     margin-bottom: 10px;
 }
@@ -83,47 +63,47 @@ html, body, [class*='css'] {
     color: #e2e8f0 !important;
 }
 
-/* عنوان القسم مع فرض اللون المتكيف بدقة */
+/* البطاقات بخلفية داكنة ثابتة ومحددة لضمان وضوح كافة النصوص والعناوين البيضاء في وضع النهار ووضع الليل */
+.section-box {
+    background-color: #1e293b !important;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    margin-bottom: 10px;
+}
+
+/* عناوين الأقسام - لون أبيض ناصع ثابت ومحمي تماماً من تأثيرات خلفية الثيم الفاتح */
 .section-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-title);
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
     margin-bottom: 8px;
     direction: rtl;
     text-align: right;
 }
 
-/* البطاقات التكيفية */
-.section-box {
-    background-color: var(--bg-card);
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border-card);
-    margin-bottom: 10px;
-}
-
-/* صندوق إخلاء المسؤولية التكيفي */
+/* صندوق إخلاء المسؤولية المنسق */
 .disclaimer-box {
-    background-color: var(--disclaimer-bg);
-    border-right: 4px solid var(--disclaimer-border);
+    background-color: #1e293b !important;
+    border-right: 4px solid #f59e0b !important;
     padding: 8px 12px;
     border-radius: 6px;
     margin-top: 2px;
     margin-bottom: 6px;
     font-size: 0.82rem;
-    color: var(--disclaimer-text);
+    color: #cbd5e1 !important;
     direction: rtl;
     text-align: right;
     line-height: 1.4;
 }
 .disclaimer-title {
     font-weight: bold;
-    color: var(--disclaimer-border);
+    color: #fbbf24 !important;
     margin-bottom: 2px;
     font-size: 0.85rem;
 }
 
-/* الأزرار بلون أزرق ثابت وواضح */
+/* توحيد وتنسيق الأزرار */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -211,7 +191,7 @@ if menu_option == "الرئيسية":
                     st.success("✅ تم فحص النص بنجاح!")
                     if found_local_words:
                         st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-                    st.markdown("<h4 style='text-align: right;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
                     st.markdown(completion.choices[0].message.content)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي: {e}")
@@ -233,7 +213,7 @@ if menu_option == "الرئيسية":
                     prompt = "قم بتحليل هذه الصورة لإعلان تجاري لـ Meta. وضح هل تخالف السياسات وما هي التعديلات المطلوبة على التصميم لضمان قبوله."
                     res_text = analyze_image_with_fallback(image, prompt)
                     st.success("✅ تم تحليل الصورة بنجاح!")
-                    st.markdown("<h4 style='text-align: right;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
