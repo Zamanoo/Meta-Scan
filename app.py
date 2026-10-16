@@ -155,8 +155,8 @@ def analyze_image_with_gemini_rotation(image, prompt):
     for api_key in gemini_keys:
         try:
             genai.configure(api_key=api_key)
-            # استخدام نموذج gemini-pro-vision المخصص والمدعوم للرؤية وتحليل الصور
-            model = genai.GenerativeModel('gemini-pro-vision')
+            # استخدام أحدث نموذج موحد للرؤية والنصوص من جوجل
+            model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content([image, prompt])
             if response and response.text:
                 return response.text
