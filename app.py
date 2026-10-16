@@ -14,8 +14,12 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن، إخفاء شريط الأدوات، وتنسيق الفراغات برقم -0.2rem
+# حقن ملف الـ Manifest وأيقونة الـ PWA مع إعدادات الثيم الداكن والتنسيق المخصص
 st.markdown("""
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0068c4">
+<link rel="apple-touch-icon" href="icon.png">
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
 
@@ -37,9 +41,9 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* ضبط الفراغات الرأسية للعناصر بالقيمة -0.2rem */
+/* ضبط الفراغات الرأسية للعناصر بالقيمة -0.1rem */
 .stElementContainer {
-    margin-bottom: -0.2rem !important;
+    margin-bottom: -0.1rem !important;
 }
 
 /* إخفاء القائمة الجانبية والشريط العلوي وأدوات Streamlit الافتراضية بالكامل */
