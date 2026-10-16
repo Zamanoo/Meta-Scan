@@ -325,14 +325,14 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع أزرار التحكيم (فحص على اليمين، نسخ على اليسار)
+    # توزيع الأزرار: زر الفحص في اليمين (col1) وزر النسخ في اليسار (col2)
     col1, col2 = st.columns(2)
     with col1:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
     with col2:
         btn_copy = st.button("📋 نسخ النص", key="btn_text_copy")
 
-    # تفعيل جافاسكريبت لنسخ النص الفعلي الموجود في حقل الإدخال فوراً
+    # تنفيذ جافاسكريبت لنسخ النص الفعلي الموجود في حقل الإدخال فوراً
     if btn_copy:
         st.components.v1.html(f"""
             <script>
