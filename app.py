@@ -68,6 +68,8 @@ html, body, [class*='css'] {
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     margin-bottom: 10px;
+    direction: rtl !important;
+    text-align: right !important;
 }
 
 .section-title {
@@ -176,6 +178,16 @@ html, body, [class*='css'] {
     text-align: right !important;
     display: block !important;
 }
+
+/* محاذاة أسطر خيارات القائمة الجانبية بدقة نحو اليمين */
+.rtl-menu-content {
+    direction: rtl !important;
+    text-align: right !important;
+}
+.rtl-menu-content p, .rtl-menu-content div, .rtl-menu-content ol, .rtl-menu-content ul, .rtl-menu-content li {
+    direction: rtl !important;
+    text-align: right !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -263,7 +275,6 @@ def display_formatted_report(raw_text):
     """دالة معالجة نص التقرير وعرضه بعناوين HTML بارزة ومفصولة تماماً"""
     clean_text = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_text).strip()
     
-    # تقسيم النص بناءً على الكلمات المفتاحية للعناوين لضمان ظهورها كعناوين مستقلة ومنسقة
     parts = re.split(r'(خلاصة الفحص والتقييم العام|التقرير التفصيلي والكلمات الحساسة|البديل الموصى به والمتوافق|فحص الشخصيات والعناصر المرئية|التوصيات والتعديلات المطلوبة)', clean_text)
     
     html_output = '<div class="report-container">'
@@ -271,7 +282,6 @@ def display_formatted_report(raw_text):
         title = parts[i].strip()
         content = parts[i+1].strip() if (i+1) < len(parts) else ""
         
-        # إضافة رمز تعبيري لكل عنوان حسب محتواه
         emoji = "📋"
         if "التفصيلي" in title or "الشخصيات" in title:
             emoji = "🔍" if "التفصيلي" in title else "👤"
@@ -414,6 +424,7 @@ if menu_option == "الرئيسية":
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📖 دليل معايير مجتمع Meta</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
     st.write("يعتمد فاحص **META SCAN** على تحليل المحتوى وفقاً لأبرز بنود السياسة والمعايير المعتمدة التالية من Meta:")
     st.markdown("""
     1. **العنف والتحريض:** منع الترويج للأعمال العنفية، التهديدات، أو الأسلحة.
@@ -433,10 +444,12 @@ elif menu_option == "دليل معايير مجتمع Meta":
     15. **الاحتيال التجاري:** ضمان مصداقية العروض التجارية والإعلانات الممولة.
     """)
     st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "سياسة الخصوصية":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🔒 سياسة الخصوصية</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
     st.write("نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية في تطبيق **META SCAN**:")
     st.markdown("""
     1. التطبيق لا يطلب أي معلومات شخصية ولا يتطلب إنشاء حساب ولا يقوم بتخزين أي نصوص أو صور.
@@ -444,10 +457,12 @@ elif menu_option == "سياسة الخصوصية":
     3. نقل البيانات يتم عبر بروتوكول مشفر (HTTPS).
     """)
     st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "سياسة المستخدم":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">⚖️ سياسة المستخدم</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
     st.write("يرجى قراءة بنود وسياسة استخدام التطبيق بعناية:")
     st.markdown("""
     1. النتائج يتم توليدها عبر الذكاء الاصطناعي والتطبيق غير مسؤول عن أي قرارات تتخذها بناءً عليها.
@@ -455,17 +470,22 @@ elif menu_option == "سياسة المستخدم":
     3. يمنع استخدام التطبيق لفحص مواد تخالف القانون أو الآداب العامة.
     """)
     st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "عن التطبيق":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">ℹ️ عن التطبيق</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
     st.write("تم برمجة وتطوير هذا التطبيق بواسطة **Sakhr AlHubaish** لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.")
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "راسل التطبيق":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
     st.write("يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:\n\n📧 **sakhrs545@gmail.com**")
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # عبارة إخلاء المسؤولية
