@@ -337,20 +337,21 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ يعمل مباشرة عبر JavaScript متطور وملاصق للحافة
+    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML مع تفعيل صلاحيات clipboard-write الأمنية
     col_right, col_left = st.columns(2)
     
     with col_right:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
-        # زر نسخ مباشر بـ HTML/JS لضمان الالتصاق بأقصى اليسار والعمل الفوري بدون إعادة تحميل
-        st.markdown("""
+        st.components.v1.html("""
         <button onclick="
             const textarea = window.parent.document.querySelector('textarea');
             if (textarea && textarea.value.trim() !== '') {
                 navigator.clipboard.writeText(textarea.value).then(() => {
                     alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
+                }).catch(err => {
+                    alert('❌ تعذر النسخ، يرجى السماح للمتصفح بالوصول للحافظة');
                 });
             } else {
                 alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
@@ -371,7 +372,7 @@ if menu_option == "الرئيسية":
         " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
             📋 نسخ النص
         </button>
-        """, unsafe_allow_html=True)
+        """, height=50, scrolling=False)
 
     if btn_text:
         if not post_content.strip():
