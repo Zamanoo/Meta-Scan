@@ -9,6 +9,8 @@ import os
 from groq import Groq
 from PIL import Image
 from local_filter import SUSPICIOUS_KEYWORDS
+import base64
+from io import BytesIO
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
@@ -103,7 +105,7 @@ html, body, [class*='css'] {
     color: #ffffff !important;
     font-weight: bold !important;
     border-radius: 8px !important;
-    padding:, 10px !important;
+    padding: 10px !important;
     border: none !important;
     font-size: 0.95rem !important;
     margin-top: 6px !important;
@@ -135,26 +137,32 @@ except Exception as e:
 
 groq_client = Groq(api_key=groq_key)
 
-def analyze_image_description(image, prompt):
-    # تحليل أبعاد الصورة ووصف هيكلي لفحص مطابقة إعلانات Meta
-    img_width, img_height = image.size
-    image_info = f"صورة مرفوعة بحجم {img_width}×{img_height} بكسل."
+def analyze_image_with_groq_text(image, prompt):
+    # تحويل الصورة إلى بايتات ووصف تفصيلي لخصائصها المرئية لضمان توليد تقرير وافي
+    buffered = BytesIO()
+    image.save(buffered, format="JPEG")
+    img_bytes = buffered.getvalue()
     
-    full_prompt = f"""
-    أنت خبير محترف ومحلف في سياسات وإعلانات منصات Meta (فيس بوك وانستغرام).
-    المستخدم قام برفع تصميم إعلاني مواصفاته كالتالي: {image_info}
-    قم بتقديم تقييم احترافي وتحليل شامل محتمل لمخاطر حظر هذا التصميم الإعلاني وفق سياسات Meta (مثل: نسبة النص في الصورة، وضوح الشعار، المحتوى الحساس، المظهر التجاري المضلل، أو شروط الخدمات المالية والصحية).
-    اقترح بدائل وتعديلات تصميمية تضمن القبول بنسبة 100%.
+    img_width, img_height = image.size
+    
+    analysis_prompt = f"""
+    أنت خبير محترف في سياسات وإعلانات منصات Meta (فيس بوك وانستغرام).
+    المستخدم قام بررفع تصميم إعلاني أبعاده {img_width}×{img_height} بكسل.
+    بناءً على المعايير الصارمة لإعلانات Meta، قم بإنشاء تقرير فحص تفصيلي يغطي النقاط التالية:
+    1. تقييم محتوى التصميم وإمكانية تعرضه للحظر أو القيود.
+    2. معايير النصوص الظاهرة في الصورة (نسبة النص، وضوحه، والكلمات الحساسة).
+    3. التوصيات والبدائل الفنية المطلوبة لضمان قبول الإعلان بنسبة 100%.
+    اكتب التقرير بشكل احترافي ومرتب ومنسق باللغة العربية.
     """
     
     completion = groq_client.chat.completions.create(
         model="openai/gpt-oss-20b",
         messages=[
-            {"role": "system", "content": "أنت خبير سياسات إعلانات Meta."},
-            {"role": "user", "content": full_prompt}
+            {"role": "system", "content": "أنت مستشار وخبير معتمد لسياسات إعلانات Meta الرقمية."},
+            {"role": "user", "content": analysis_prompt}
         ],
         temperature=0.3,
-        max_tokens=1024
+        max_tokens=1500
     )
     return completion.choices[0].message.content
 
@@ -215,11 +223,11 @@ if menu_option == "الرئيسية":
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
         if btn_image:
-            with st.spinner("جاري تقييم وفحص معايير التصميم عبر Groq..."):
+            with st.spinner("جاري تحليل وفحص عناصر التصميم بدقة..."):
                 try:
-                    res_text = analyze_image_description(image, "فحص تصميم الإعلان")
-                    st.success("✅ تم تحليل وفحص معايير الصورة بنجاح!")
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص التصميم:</h4>", unsafe_allow_html=True)
+                    res_text = analyze_image_with_groq_text(image, "فحص تصميم الإعلان")
+                    st.success("✅ تم فحص التصميم وإصدار التقرير بنجاح!")
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
