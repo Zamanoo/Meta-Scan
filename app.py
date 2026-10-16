@@ -6,6 +6,7 @@
 
 import streamlit as st
 import os
+import re
 from groq import Groq
 import google.generativeai as genai
 from PIL import Image
@@ -13,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد ومستقر للثيم الداكن الدائم والعناوين الواضحة
+# CSS موحد ومستقر للثيم الداكن الدائم والبطاقات التفاعلية
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -125,6 +126,37 @@ html, body, [class*='css'] {
     direction: rtl;
     text-align: right;
 }
+
+/* بطاقات مؤشرات النتيجة التفاعلية */
+.status-card {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    direction: rtl;
+}
+
+.status-safe {
+    background-color: rgba(16, 185, 129, 0.15);
+    border: 2px solid #10b981;
+    color: #34d399 !important;
+}
+
+.status-warning {
+    background-color: rgba(245, 158, 11, 0.15);
+    border: 2px solid #f59e0b;
+    color: #fbbf24 !important;
+}
+
+.status-danger {
+    background-color: rgba(239, 68, 68, 0.15);
+    border: 2px solid #ef4444;
+    color: #f87171 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -155,26 +187,18 @@ def analyze_image_with_gemini_rotation(image, prompt):
     for api_key in gemini_keys:
         try:
             genai.configure(api_key=api_key)
-            
-            # قائمة النماذج المرشحة للبحث التلقائي عما هو متاح ومفعل على المفتاح
             candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision', 'gemini-pro']
-            
             response = None
-            success_model = None
-            
             for model_name in candidate_models:
                 try:
                     model = genai.GenerativeModel(model_name)
                     response = model.generate_content([image, prompt])
                     if response and response.text:
-                        success_model = model_name
                         break
                 except Exception:
                     continue
-            
             if response and response.text:
                 return response.text
-                
         except Exception as e:
             last_error = str(e)
             if "429" in str(e) or "ResourceExhausted" in str(e):
@@ -183,6 +207,30 @@ def analyze_image_with_gemini_rotation(image, prompt):
                 continue
                 
     raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح والموديلات المتاحة: {last_error}")
+
+def render_status_badge(text_content):
+    """دالة قراءة حالة التقييم ورسم المؤشر البصري الخاص بها"""
+    if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
+        st.markdown('''
+        <div class="status-card status-safe">
+            <span>🟢 النتيجة: محتوى غير مخالف (آمن للإعلان)</span>
+            <span>✅</span>
+        </div>
+        ''', unsafe_allow_html=True)
+    elif "STATUS: DANGER" in text_content or "حالة المحتوى: مخالف" in text_content or "نص مخالف" in text_content or "صورة مخالفة" in text_content:
+        st.markdown('''
+        <div class="status-card status-danger">
+            <span>🔴 النتيجة: محتوى مخالف لسياسات Meta</span>
+            <span>❌</span>
+        </div>
+        ''', unsafe_allow_html=True)
+    else:
+        st.markdown('''
+        <div class="status-card status-warning">
+            <span>🟡 النتيجة: محتوى مشبوه (يتطلب تعديلات)</span>
+            <span>⚠️</span>
+        </div>
+        ''', unsafe_allow_html=True)
 
 menu_option = st.selectbox(
     "اختر القسم:",
@@ -198,9 +246,9 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيد والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
 
-    # 1. قسم فحص نصوص المنشور (عبر Groq)
+    # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
     
@@ -212,25 +260,49 @@ if menu_option == "الرئيسية":
             st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
         else:
             found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
-            with st.spinner("جاري التحليل العميق للسياق عبر Groq..."):
+            with st.spinner("جاري تحليل النص وإعداد التقرير..."):
                 try:
-                    system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
+                    system_prompt = (
+                        "أنت خبير محترف في سياسات وإعلانات منصات Meta.\n"
+                        "قم بتحليل النص المدخل بدقة، ويجب أن تتضمن إجابتك التنسيق المالي المباشر التالي في البداية تماماً:\n"
+                        "إذا كان النص كاملاً آمن اكتب في السطر الأول: STATUS: SAFE\n"
+                        "إذا كان يحتوي مخاطر وحظر مباشر اكتب في السطر الأول: STATUS: DANGER\n"
+                        "إذا كان يحتوي كلمات محتملة للشك اكتب في السطر الأول: STATUS: WARNING\n\n"
+                        "ثم اكتب التقرير بالهيكلية التالية:\n"
+                        "### 📊 الخلاصة والتصنيف:\n"
+                        "(وضح فيه التقييم العام بشكل مختصر)\n\n"
+                        "### 🔍 التقرير التفصيلي والكلمات الحساسة:\n"
+                        "(فحص الكلمات، السياق، والمخاطر)\n\n"
+                        "### 💡 البديل الموصى به والمتوافق:"
+                    )
+                    
                     completion = groq_client.chat.completions.create(
                         model="openai/gpt-oss-20b", 
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], 
                         temperature=0.3, 
                         max_tokens=1024
                     )
-                    st.success("✅ تم فحص النص بنجاح عبر Groq!")
+                    
+                    raw_result = completion.choices[0].message.content
+                    st.success("✅ تم فحص النص بنجاح!")
+                    
+                    # عرض بطاقة المؤشر البصري
+                    render_status_badge(raw_result)
+                    
                     if found_local_words:
-                        st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل النص:</h4>", unsafe_allow_html=True)
-                    st.markdown(completion.choices[0].message.content)
+                        st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
+                    
+                    # تنظيف النص المرجح من الرموز البرمجية
+                    clean_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_result).strip()
+                    
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص النص:</h4>", unsafe_allow_html=True)
+                    st.markdown(clean_report)
+                    
                 except Exception as e:
-                    st.error(f"❌ حدث خطأ أثناء الاتصال بنظام Groq: {e}")
+                    st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور (عبر Gemini الذكي بالتبديل الآلي)
+    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
     
@@ -241,19 +313,31 @@ if menu_option == "الرئيسية":
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
         if btn_image:
-            with st.spinner("جاري الفحص البصري العميق والتعرف على الشخصيات والعناصر عبر Gemini..."):
+            with st.spinner("جاري فحص الصورة والتعرف على العناصر..."):
                 try:
                     image_prompt = (
-                        "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta. "
-                        "قم بتحليل هذه الصورة بدقة مطلقة واستخرج تفاصيلها: "
-                        "1. من هو الشخص أو الشخصيات الموجودة في الصورة وهل هي شخصية عامة أو سياسية أو حساسة أو محظورة؟ "
-                        "2. هل تحتوي الصورة على شعارات، رموز، أسلحة، أو نصوص تخالف سياسات Meta وتؤدي لحظر الحساب؟ "
-                        "3. قدم تقييماً تفصيلياً لمدى أمان استخدام هذه الصورة في إعلان ممول مع اقتراح البدائل والتعديلات اللازمة."
+                        "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
+                        "قم بتحليل الصورة، ويجب وضع حالة النتيجة في السطر الأول تماماً كالتالي:\n"
+                        "إذا كانت الصورة آمنة تماماً: STATUS: SAFE\n"
+                        "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
+                        "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
+                        "ثم اكتب التقرير بوضوح:\n"
+                        "### 📊 الخلاصة والتصنيف:\n"
+                        "### 👤 فحص الشخصيات والعناصر المرئية:\n"
+                        "### 💡 التوصيات للتعديل والقبول الإعلاني:"
                     )
+                    
                     res_text = analyze_image_with_gemini_rotation(image, image_prompt)
-                    st.success("✅ تم الفحص البصري وإصدار التقرير بدقة عالية!")
-                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص الصورة والشخصيات:</h4>", unsafe_allow_html=True)
-                    st.markdown(res_text)
+                    st.success("✅ تم الفحص البصري بنجاح!")
+                    
+                    # عرض بطاقة المؤشر البصري للصورة
+                    render_status_badge(res_text)
+                    
+                    clean_img_report = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', res_text).strip()
+                    
+                    st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير فحص الصورة:</h4>", unsafe_allow_html=True)
+                    st.markdown(clean_img_report)
+                    
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
     else:
