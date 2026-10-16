@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS مصمم خصيصاً لضغط الفراغات وضبط الألوان والتوافق مع الموبايل
+# CSS مصمم لفرض ظهور جميع الأزرار بشكل متناسق وموحد
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -24,7 +24,6 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* تقليل الفراغات العلوية والسفلية بالصفحة */
 .block-container {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
@@ -37,12 +36,10 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* إخفاء القائمة الجانبية تماماً لمنع التداخل */
 [data-testid="stSidebar"] {
     display: none !important;
 }
 
-/* الهيدر الرئيسي المدمج والمضغوط */
 .main-header {
     background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%);
     padding: 12px 10px;
@@ -64,7 +61,6 @@ html, body, [class*='css'] {
     color: #e2e8f0;
 }
 
-/* عناوين الأقسام باللون الأبيض الناصع */
 .section-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -74,7 +70,6 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* البطاقات بخلفية مريحة ومساحات مضغوطة */
 .section-box {
     background-color: #1e293b;
     padding: 12px 14px;
@@ -90,20 +85,21 @@ html, body, [class*='css'] {
     margin: 8px 0;
 }
 
-/* أزرار الفحص */
+/* توحيد تنسيق كافة الأزرار لتظهر بشكل بارز وأزرق ومتكامل */
 .stButton>button {
-    width: 100%;
-    background-color: #0068c4;
+    width: 100% !important;
+    background-color: #0068c4 !important;
     color: white !important;
-    font-weight: bold;
-    border-radius: 8px;
-    padding: 8px;
-    border: none;
-    font-size: 0.95rem;
-    margin-top: 4px;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+    border: none !important;
+    font-size: 0.95rem !important;
+    margin-top: 6px !important;
+    display: block !important;
 }
 .stButton>button:hover {
-    background-color: #004d99;
+    background-color: #004d99 !important;
 }
 
 .local-warning {
@@ -150,7 +146,6 @@ def analyze_image_with_fallback(image, prompt):
             continue
     raise Exception(f"نفدت الحصة لجميع مفاتيح Gemini. الخطأ الأخير: {last_error}")
 
-# شريط التنقل العلوي المدمج والمضغوط
 menu_option = st.selectbox(
     "اختر القسم:",
     [
