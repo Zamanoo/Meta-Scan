@@ -142,7 +142,8 @@ def analyze_image_with_fallback(image, prompt):
     for key in GEMINI_KEYS:
         try:
             genai.configure(api_key=key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # تم التحديث إلى النموذج النشط والحديث لفحص الصور
+            model = genai.GenerativeModel('gemini-2.0-flash')
             response = model.generate_content([prompt, image])
             return response.text
         except Exception as e:
@@ -181,7 +182,6 @@ if menu_option == "الرئيسية":
             with st.spinner("جاري التحليل العميق للسياق..."):
                 try:
                     system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
-                    # تم التحديث إلى النموذج النشط الحالي
                     completion = groq_client.chat.completions.create(
                         model="openai/gpt-oss-20b", 
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], 
