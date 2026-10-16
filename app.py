@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد ومستقر للثيم الداكن الدائم والبطاقات التفاعلية وتنسيق العناوين المخرجة
+# CSS موحد ومستقر للثيم الداكن وتصحيح محاذاة القوائم المرقّمة والمنقطة نحو اليمين (RTL)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -179,14 +179,22 @@ html, body, [class*='css'] {
     display: block !important;
 }
 
-/* محاذاة أسطر خيارات القائمة الجانبية بدقة نحو اليمين */
+/* إصلاح قاطع لقوائم الترقيم والنقاط للبدء من اليمين تماماً */
 .rtl-menu-content {
     direction: rtl !important;
     text-align: right !important;
 }
-.rtl-menu-content p, .rtl-menu-content div, .rtl-menu-content ol, .rtl-menu-content ul, .rtl-menu-content li {
+.rtl-menu-content ol, .rtl-menu-content ul {
     direction: rtl !important;
     text-align: right !important;
+    padding-right: 1.5rem !important;
+    padding-left: 0rem !important;
+    margin-right: 0rem !important;
+}
+.rtl-menu-content li {
+    direction: rtl !important;
+    text-align: right !important;
+    margin-bottom: 6px !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -424,68 +432,79 @@ if menu_option == "الرئيسية":
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📖 دليل معايير مجتمع Meta</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
-    st.write("يعتمد فاحص **META SCAN** على تحليل المحتوى وفقاً لأبرز بنود السياسة والمعايير المعتمدة التالية من Meta:")
-    st.markdown("""
-    1. **العنف والتحريض:** منع الترويج للأعمال العنفية، التهديدات، أو الأسلحة.
-    2. **خطاب الكراهية:** محاربة الهجوم على الأفراد أو المجموعات بناءً على العرق، الدين، الجنس.
-    3. **المحتوى الجنسي والعري:** منع الترويج للصور أو العبارات الفاضحة.
-    4. **الخطاب المضلل:** تجنب الأخبار المزيفة المؤثرة على السلامة العامة والانتخابات.
-    5. **الملكية الفكرية:** حماية حقوق الملكية والقرصنة والعلامات التجارية.
-    6. **المنتجات والخدمات المقيدة:** كالسلع المقيدة والعمليات المالية غير المرخصة.
-    7. **الأمان والخصوصية:** منع مشاركة المعلومات الشخصية للآخرين (Doxxing).
-    8. **التنمر والتحرش:** منع الإساءة المباشرة والمضايقات الرقمية.
-    9. **الاحتيال والخداع:** منع الترويج للأنشطة المالية المشبوهة أو الوهمية.
-    10. **السلع الخاضعة للرقابة:** الأدوية غير المرخصة والمواد المخدرة.
-    11. **الانتحار أو إيذاء النفس:** منع تشجيع أو وصف وسائل إيذاء النفس.
-    12. **التطرف والإرهاب:** حظر المنظمات الإرهابية والترويج لأفكارها.
-    13. **التلاعب بالنظام (Spam):** نشر الروابط الوهمية والتفاعل الزائف.
-    14. **الأخبار الصحية الزائفة:** تضليل الجمهور بشأن القضايا الصحية.
-    15. **الاحتيال التجاري:** ضمان مصداقية العروض التجارية والإعلانات الممولة.
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="rtl-menu-content">
+        <p>يعتمد فاحص <b>META SCAN</b> على تحليل المحتوى وفقاً لأبرز بنود السياسة والمعايير المعتمدة التالية من Meta:</p>
+        <ol>
+            <li><b>العنف والتحريض:</b> منع الترويج للأعمال العنفية، التهديدات، أو الأسلحة.</li>
+            <li><b>خطاب الكراهية:</b> محاربة الهجوم على الأفراد أو المجموعات بناءً على العرق، الدين، الجنس.</li>
+            <li><b>المحتوى الجنسي والعري:</b> منع الترويج للصور أو العبارات الفاضحة.</li>
+            <li><b>الخطاب المضلل:</b> تجنب الأخبار المزيفة المؤثرة على السلامة العامة والانتخابات.</li>
+            <li><b>الملكية الفكرية:</b> حماية حقوق الملكية والقرصنة والعلامات التجارية.</li>
+            <li><b>المنتجات والخدمات المقيدة:</b> كالسلع المقيدة والعمليات المالية غير المرخصة.</li>
+            <li><b>الأمان والخصوصية:</b> منع مشاركة المعلومات الشخصية للآخرين (Doxxing).</li>
+            <li><b>التنمر والتحرش:</b> منع الإساءة المباشرة والمضايقات الرقمية.</li>
+            <li><b>الاحتيال والخداع:</b> منع الترويج للأنشطة المالية المشبوهة أو الوهمية.</li>
+            <li><b>السلع الخاضعة للرقابة:</b> الأدوية غير المرخصة والمواد المخدرة.</li>
+            <li><b>الانتحار أو إيذاء النفس:</b> منع تشجيع أو وصف وسائل إيذاء النفس.</li>
+            <li><b>التطرف والإرهاب:</b> حظر المنظمات الإرهابية والترويج لأفكارها.</li>
+            <li><b>التلاعب بالنظام (Spam):</b> نشر الروابط الوهمية والتفاعل الزائف.</li>
+            <li><b>الأخبار الصحية الزائفة:</b> تضليل الجمهور بشأن القضايا الصحية.</li>
+            <li><b>الاحتيال التجاري:</b> ضمان مصداقية العروض التجارية والإعلانات الممولة.</li>
+        </ol>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "سياسة الخصوصية":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🔒 سياسة الخصوصية</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
-    st.write("نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية في تطبيق **META SCAN**:")
-    st.markdown("""
-    1. التطبيق لا يطلب أي معلومات شخصية ولا يتطلب إنشاء حساب ولا يقوم بتخزين أي نصوص أو صور.
-    2. تتم معالجة النصوص والصور عبر واجهات برمجية آمنة وموثوقة.
-    3. نقل البيانات يتم عبر بروتوكول مشفر (HTTPS).
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="rtl-menu-content">
+        <p>نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية في تطبيق <b>META SCAN</b>:</p>
+        <ol>
+            <li>التطبيق لا يطلب أي معلومات شخصية ولا يتطلب إنشاء حساب ولا يقوم بتخزين أي نصوص أو صور.</li>
+            <li>تتم معالجة النصوص والصور عبر واجهات برمجية آمنة وموثوقة.</li>
+            <li>نقل البيانات يتم عبر بروتوكول مشفر (HTTPS).</li>
+        </ol>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "سياسة المستخدم":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">⚖️ سياسة المستخدم</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
-    st.write("يرجى قراءة بنود وسياسة استخدام التطبيق بعناية:")
-    st.markdown("""
-    1. النتائج يتم توليدها عبر الذكاء الاصطناعي والتطبيق غير مسؤول عن أي قرارات تتخذها بناءً عليها.
-    2. النتائج تقريبية ومبنية على معايير Meta.
-    3. يمنع استخدام التطبيق لفحص مواد تخالف القانون أو الآداب العامة.
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="rtl-menu-content">
+        <p>يرجى قراءة بنود وسياسة استخدام التطبيق بعناية:</p>
+        <ol>
+            <li>النتائج يتم توليدها عبر الذكاء الاصطناعي والتطبيق غير مسؤول عن أي قرارات تتخذها بناءً عليها.</li>
+            <li>النتائج تقريبية ومبنية على معايير Meta.</li>
+            <li>يمنع استخدام التطبيق لفحص مواد تخالف القانون أو الآداب العامة.</li>
+        </ol>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "عن التطبيق":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">ℹ️ عن التطبيق</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
-    st.write("تم برمجة وتطوير هذا التطبيق بواسطة **Sakhr AlHubaish** لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="rtl-menu-content">
+        <p>تم برمجة وتطوير هذا التطبيق بواسطة <b>Sakhr AlHubaish</b> لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.</p>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif menu_option == "راسل التطبيق":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rtl-menu-content">', unsafe_allow_html=True)
-    st.write("يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:\n\n📧 **sakhrs545@gmail.com**")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="rtl-menu-content">
+        <p>يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:</p>
+        <p>📧 <b>sakhrs545@gmail.com</b></p>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # عبارة إخلاء المسؤولية
