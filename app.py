@@ -75,7 +75,7 @@ html, body, [class*='css'] {
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1px;
+    margin-bottom: 5px;
 }
 
 /* صندوق إخلاء المسؤولية المنسق والمرفوع للأعلى بدون فراغات */
