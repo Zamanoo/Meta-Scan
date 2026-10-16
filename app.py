@@ -145,7 +145,7 @@ def analyze_image_with_qwen(image, prompt):
     image_url = f"data:image/jpeg;base64,{img_str}"
     
     completion = groq_client.chat.completions.create(
-        model="qwen/qwen3.8-27b",  # نموذج Qwen المتعدد الوسائط والمدعوم للرؤية على Groq
+        model="qwen/qwen3.8-27b",  # نموذج Qwen المتعدد الوسائط للرؤية على Groq
         messages=[
             {
                 "role": "user",
@@ -161,7 +161,7 @@ def analyze_image_with_qwen(image, prompt):
             }
         ],
         temperature=0.3,
-        max_tokens=1024
+        max_tokens=800  # تم تخفيضه ليتوافق مع حدود الـ OTPM في الخطة المجانية (أقل من 1000)
     )
     return completion.choices[0].message.content
 
@@ -224,7 +224,7 @@ if menu_option == "الرئيسية":
         if btn_image:
             with st.spinner("جاري فحص وتحليل الصورة عبر نظام Qwen الذكي..."):
                 try:
-                    prompt = "أنت خبير فحص سياسات إعلانات Meta. قم بتحليل هذه الصورة بدقة شديدة، اذكر ما تراه في الصورة، وهل تحتوي على أشخاص أو رموز أو نصوص قدالف سياسات Meta أو تؤدي للحظر، واقترح تعديلات لتجنب الحظر."
+                    prompt = "أنت خبير فحص سياسات إعلانات Meta. قم بتحليل هذه الصورة بدقة شديدة، اذكر ما تراه فيها، وهل تحتوي على أشخاص أو رموز أو نصوص تخالف سياسات Meta أو تؤدي للحظر، واقترح تعديلات لتجنب الحظر."
                     res_text = analyze_image_with_qwen(image, prompt)
                     st.success("✅ تم تحليل الصورة بنجاح عبر نموذج Qwen!")
                     st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
@@ -289,7 +289,7 @@ elif menu_option == "عن التطبيق":
 
 elif menu_option == "راسل التطبيق":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=Test if 'Test' in globals() else True)
+    st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=True)
     st.write("يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:\n\n📧 **sakhrs545@gmail.com**")
     st.markdown('</div>', unsafe_allow_html=True)
 
