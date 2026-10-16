@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد ومستقر مع معالجة وضع الأزرار بجانب بعضها داخل الأعمدة
+# CSS موحد للثيم الداكن وفرض تجاور الأزرار في صف واحد (Flexbox) بدون الالتفاف للأسفل
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -111,16 +111,22 @@ html, body, [class*='css'] {
     padding: 10px !important;
     border: none !important;
     font-size: 0.95rem !important;
-    margin-top: 6px !important;
+    margin-top: 0px !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
 }
 
-/* التنسيق الخاص باستجابة الأعمدة والتجاور الأفقي */
+/* أجبار الأعمدة على البقاء بجانب بعضها أفقيًا في جميع الأجهزة */
 [data-testid="stHorizontalBlock"] {
-    direction: rtl !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     gap: 8px !important;
+    direction: rtl !important;
+}
+[data-testid="stHorizontalBlock"] > div {
+    min-width: 0 !important;
 }
 
 .local-warning {
@@ -185,7 +191,7 @@ html, body, [class*='css'] {
     display: block !important;
 }
 
-/* إصلاح قاطع لقوائم الترقيم والنقاط للبدء من اليمين تماماً */
+/* إصلاح لقوائم الترقيم والنقاط للبدء من اليمين تماماً */
 .rtl-menu-content {
     direction: rtl !important;
     text-align: right !important;
