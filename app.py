@@ -221,7 +221,7 @@ def render_status_badge(text_content):
     if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
         st.markdown('''
         <div class="status-card status-safe">
-            <span>🟢 النتيجة: محتوى غير مخالف (آمن للإعلان)</span>
+            <span>🟢 النتيجة: محتوى غير مخالف (آمن للنشر)</span>
             <span>✅</span>
         </div>
         ''', unsafe_allow_html=True)
@@ -254,7 +254,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيود والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
