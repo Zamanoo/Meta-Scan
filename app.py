@@ -164,7 +164,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيد والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -181,9 +181,9 @@ if menu_option == "الرئيسية":
             with st.spinner("جاري التحليل العميق للسياق..."):
                 try:
                     system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
-                    # تم التحديث إلى النموذج المعتمد والنشط حالياً في Groq
+                    # استخدام النموذج القياسي المتوفر لجميع حسابات Groq
                     completion = groq_client.chat.completions.create(
-                        model="llama-3.3-70b-versatile", 
+                        model="llama3-8b-instruct", 
                         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], 
                         temperature=0.3, 
                         max_tokens=1024
