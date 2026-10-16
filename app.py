@@ -106,11 +106,11 @@ html, body, [class*='css'] {
     width: 100% !important;
     background-color: #0068c4 !important;
     color: #ffffff !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     border-radius: 8px !important;
     padding: 10px !important;
     border: none !important;
-    font-size: 0.95rem !important;
+    font-size: 0.9rem !important;
     margin-top: 0px !important;
     font-family: 'Cairo', sans-serif !important;
     box-sizing: border-box !important;
@@ -341,7 +341,7 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر النسخ بـ HTML مطابق تماماً في الخط والسُمك والحجم
+    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع مطابقة دقيقة لحجم وسُمك الخط
     col_right, col_left = st.columns(2)
     
     with col_right:
@@ -364,11 +364,11 @@ if menu_option == "الرئيسية":
             width: 100%;
             background-color: #0068c4;
             color: white;
-            font-weight: 700;
+            font-weight: 600;
             border-radius: 8px;
             padding: 10px;
             border: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             margin-top: -10px;
             text-align: center;
