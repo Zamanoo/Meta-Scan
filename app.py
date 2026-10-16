@@ -7,10 +7,10 @@
 import streamlit as st
 import os
 from groq import Groq
-import google.generativeai as genai
 from PIL import Image
 from local_filter import SUSPICIOUS_KEYWORDS
-import time
+import base64
+from io import BytesIO
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
@@ -131,34 +131,39 @@ html, body, [class*='css'] {
 
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
-    GEMINI_KEYS = [st.secrets["GEMINI_KEY_1"], st.secrets["GEMINI_KEY_2"], st.secrets["GEMINI_KEY_3"], st.secrets["GEMINI_KEY_4"]]
 except Exception as e:
-    st.error("⚠️ تنبيه أمني: لم يتم العثور على المفاتيح السرية في إعدادات المنصة (Secrets).")
+    st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
 groq_client = Groq(api_key=groq_key)
 
-def analyze_image_with_fallback(image, prompt):
-    last_error = None
-    for idx, key in enumerate(GEMINI_KEYS):
-        try:
-            genai.configure(api_key=key)
-            model = genai.GenerativeModel('gemini-3.8-flash')
-            response = model.generate_content([prompt, image])
-            return response.text
-        except Exception as e:
-            last_error = str(e)
-            # إذا كان الخطأ متعلقاً بتجاوز الحصة (429)، ننتظر قليلاً وننتقل للمفتاح التالي
-            if "429" in last_error or "Quota exceeded" in last_error:
-                time.sleep(1)
-                continue
-            continue
+def analyze_image_with_groq(image, prompt):
+    # تحويل الصورة إلى صيغة base64 لترسل بسلامة عبر واجهة Groq Vision
+    buffered = BytesIO()
+    image.save(buffered, format="JPEG")
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    image_url = f"data:image/jpeg;base64,{img_str}"
     
-    # إذا كانت المشكلة هي تجاوز الحصة للجميع
-    if last_error and ("429" in last_error or "Quota exceeded" in last_error):
-        raise Exception("تم الوصول للحد الأقصى لعدد طلبات الفحص المجانية في الدقيقة (Rate Limit). يرجى الانتظار لمدة دقيقة ثم المحاولة مرة أخرى.")
-    else:
-        raise Exception(f"خطأ في الاتصال بنظام تحليل الصور: {last_error}")
+    completion = groq_client.chat.completions.create(
+        model="llama-3.2-11b-vision-preview",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_url
+                        }
+                    }
+                ]
+            }
+        ],
+        temperature=0.3,
+        max_tokens=1024
+    )
+    return completion.choices[0].message.content
 
 menu_option = st.selectbox(
     "اختر القسم:",
@@ -217,11 +222,11 @@ if menu_option == "الرئيسية":
         st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
         if btn_image:
-            with st.spinner("جاري تحليل الصورة..."):
+            with st.spinner("جاري تحليل الصورة عبر نظام Groq Vision..."):
                 try:
-                    prompt = "قم بتحليل هذه الصورة لإعلان تجاري لـ Meta. وضح هل تخالف السياسات وما هي التعديلات المطلوبة على التصميم لضمان قبوله."
-                    res_text = analyze_image_with_fallback(image, prompt)
-                    st.success("✅ تم تحليل الصورة بنجاح!")
+                    prompt = "أنت خبير سياسات إعلانات Meta. قم بتحليل هذه الصورة لإعلان تجاري بدقة، وضح هل تخالف السياسات وما هي التعديلات المطلوبة على التصميم لضمان قبوله."
+                    res_text = analyze_image_with_groq(image, prompt)
+                    st.success("✅ تم تحليل الصورة بنجاح عبر Groq!")
                     st.markdown("<h4 style='text-align: right; color: #ffffff;'>📊 تقرير تحليل الصورة:</h4>", unsafe_allow_html=True)
                     st.markdown(res_text)
                 except Exception as e:
