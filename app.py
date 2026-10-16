@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتوحيد حجم خط جميع الأزرار بدقة ليكون 0.92rem
+# CSS موحد للثيم الداكن وتنسيق المربعات والحواف
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,7 +101,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* توحيد حجم وحجم وخط جميع أزرار Streamlit لتكون بقيمة 0.92rem تماماً */
+/* تنسيق أزرار Streamlit المتبقية (مثل فحص جديد) */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -222,6 +222,8 @@ if "image_result" not in st.session_state:
     st.session_state.image_result = None
 if "text_counter" not in st.session_state:
     st.session_state.text_counter = 0
+if "trigger_text_scan" not in st.session_state:
+    st.session_state.trigger_text_scan = False
 
 # 1. تهيئة Groq لفحص النصوص
 try:
@@ -341,16 +343,43 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع حجم خط 0.92rem ومحاذاة دقيقة
+    # إضافة معرف فريد لحقل الإدخال عبر JS لضمان سهولة الوصول إليه للنسخ
+    st.components.v1.html("""
+        <script>
+            const textarea = window.parent.document.querySelector('textarea');
+            if (textarea) {
+                textarea.id = 'post-textarea-main';
+            }
+        </script>
+    """, height=0)
+
+    # توزيع الأعمدة: اليمين لزر الفحص (HTML متطابق تماماً)، اليسار لزر النسخ (HTML متطابق تماماً)
     col_right, col_left = st.columns(2)
     
     with col_right:
+        # زر الفحص عبر HTML ليتطابق مع زر النسخ بمسطرة واحدة وخط متطابق تماماً
+        scan_action_key = f"scan_action_{st.session_state.text_counter}"
+        
+        # نستخدم زر HTML يرسل إشارة بايثون عبر query params أو نخلق حقل خفي، 
+        # وبما أننا نريد تنفيذاً آمناً 100% ومضموناً، سنستعين بـ st.button مع زر HTML يتم النقر عليه برمجياً، 
+        # أو الأسهل: جعل زر الفحص HTML بالكامل مع تمرير الحدث عبر مكون Streamlit (أو استخدام st.button الأساسي مع توحيد كلاساته)، 
+        # ولكن لحل مشكلة الخط نهائياً وبأعلى دقة، سنستخدم تصميم الزرين بـ HTML متطابق تماماً في الخصائص:
+        
+        # الطريقة الأسهل والأنظف: استخدام زر HTML لزر الفحص يضغط على زر مخفي في بايثون!
+        pass
+
+    # لاستبعاد أي تعقيد، سنستخدم طريقة HTML موحدة تماماً للزرين في نفس السطر:
+    col_right, col_left = st.columns(2)
+    
+    with col_right:
+        # زر الفحص البرمجي مع إجبار خصائص الـ CSS عبر حقن مباشر لعنصر الزر الخاص به
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
         st.components.v1.html("""
         <button onclick="
-            const textarea = window.parent.document.querySelector('textarea');
+            const textarea = window.parent.document.querySelector('#post-textarea-main') || 
+                             window.parent.document.querySelector('textarea');
             if (textarea && textarea.value.trim() !== '') {
                 navigator.clipboard.writeText(textarea.value).then(() => {
                     alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
@@ -373,10 +402,27 @@ if menu_option == "الرئيسية":
             margin-top: -10px;
             text-align: center;
             font-family: 'Cairo', sans-serif;
+            box-sizing: border-box;
+            line-height: normal;
         " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
             📋 نسخ النص
         </button>
         """, height=44, scrolling=False)
+
+    # لتجاوز اختلاف محرك متصفح Streamlit عن الـ HTML، سنقوم بحقن كلاس CSS مباشر ليجبر زر Streamlit على أن يطابق زر الـ HTML بالحرف:
+    st.markdown("""
+    <style>
+    /* تطبيق مقاييس زر النسخ تماماً على زر Streamlit لتوحيد الخط والنوع والحجم بدقة تامة */
+    div[data-testid="column"] button {
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
+        font-family: 'Cairo', sans-serif !important;
+        padding: 10px !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     if btn_text:
         if not post_content.strip():
