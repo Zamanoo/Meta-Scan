@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS محترف ومضمون لضمان وضوح العناوين في جميع الأوضاع (Light/Dark)
+# CSS موحد ومستقر للثيم الداكن الدائم والعناوين الواضحة
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -36,12 +36,10 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* إخفاء القائمة الجانبية تماماً لمنع أي تداخل */
 [data-testid="stSidebar"] {
     display: none !important;
 }
 
-/* الهيدر الرئيسي */
 .main-header {
     background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%);
     padding: 12px 10px;
@@ -63,7 +61,6 @@ html, body, [class*='css'] {
     color: #e2e8f0 !important;
 }
 
-/* البطاقات بخلفية داكنة ثابتة ومحددة لضمان وضوح كافة النصوص والعناوين البيضاء في وضع النهار ووضع الليل */
 .section-box {
     background-color: #1e293b !important;
     padding: 12px 14px;
@@ -72,7 +69,6 @@ html, body, [class*='css'] {
     margin-bottom: 10px;
 }
 
-/* عناوين الأقسام - لون أبيض ناصع ثابت ومحمي تماماً من تأثيرات خلفية الثيم الفاتح */
 .section-title {
     font-size: 1.1rem !important;
     font-weight: 700 !important;
@@ -82,7 +78,6 @@ html, body, [class*='css'] {
     text-align: right;
 }
 
-/* صندوق إخلاء المسؤولية المنسق */
 .disclaimer-box {
     background-color: #1e293b !important;
     border-right: 4px solid #f59e0b !important;
@@ -103,7 +98,6 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* توحيد وتنسيق الأزرار */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -170,7 +164,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والإعلانات المرئية وتجنب الحظر</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>النظام الذكي لفحص النصوص والصور المرئية وتجنب القيد والحظر من منصة ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -187,7 +181,13 @@ if menu_option == "الرئيسية":
             with st.spinner("جاري التحليل العميق للسياق..."):
                 try:
                     system_prompt = "أنت خبير محترف في سياسات وإعلانات منصات Meta. قم بتحليل النص المدخل بدقة، وبين مدى مطابقته للمعايير وسياسات المجتمع، وحدد الكلمات الحساسة واقترح تعديلات بديلة مضمونة الأمان."
-                    completion = groq_client.chat.completions.create(model="llama-3.1-8b-instant", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], temperature=0.3, max_tokens=1024)
+                    # تم التحديث إلى النموذج المعتمد والنشط حالياً في Groq
+                    completion = groq_client.chat.completions.create(
+                        model="llama-3.3-70b-versatile", 
+                        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": post_content}], 
+                        temperature=0.3, 
+                        max_tokens=1024
+                    )
                     st.success("✅ تم فحص النص بنجاح!")
                     if found_local_words:
                         st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد كلمات/مصطلحات حساسة في النص: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
