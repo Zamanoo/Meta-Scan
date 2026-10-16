@@ -15,10 +15,10 @@ st.set_page_config(
     page_title="META SCAN",
     page_icon="🛡️",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"  # مغلقة افتراضياً في الجوال لمنع التداخل
 )
 
-# تنسيق CSS مخصص لدعم اللغة العربية والمظهر الاحترافي
+# تنسيق CSS محسن ومتجاوب كلياً للهواتف المحمولة لمنع تداخل الحروف والعناصر
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -32,18 +32,40 @@ st.markdown("""
     }
     .main-header {
         background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%);
-        padding: 25px;
+        padding: 20px 15px;
         border-radius: 12px;
         color: white;
         text-align: center;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
+        word-wrap: break-word;
+    }
+    .main-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+    .main-header p {
+        font-size: 0.95rem;
+        margin: 0;
     }
     .section-box {
         background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 12px;
+        padding: 15px;
+        border-radius: 10px;
         border: 1px solid #e9ecef;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
+    }
+    /* فواصل بيضاء ونحيفة ونظيفة */
+    .custom-divider {
+        border: none;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.4);
+        margin: 15px 0;
+    }
+    .custom-divider-dark {
+        border: none;
+        height: 1px;
+        background-color: #dee2e6;
+        margin: 15px 0;
     }
     .stButton>button {
         width: 100%;
@@ -64,6 +86,7 @@ st.markdown("""
         border-radius: 8px;
         color: #856404;
         margin-top: 10px;
+        font-size: 0.9rem;
     }
     .app-version {
         text-align: center;
@@ -107,9 +130,9 @@ def analyze_image_with_fallback(image, prompt):
 # القائمة الجانبية (Sidebar Navigation)
 # ==========================================
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=70)
+    st.image("https://img.icons8.com/color/96/artificial-intelligence.png", width=60)
     st.title("META SCAN")
-    st.markdown("---")
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     
     menu_option = st.radio(
         "القائمة الرئيسية:",
@@ -124,7 +147,7 @@ with st.sidebar:
         index=0
     )
     
-    st.markdown("---")
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     st.markdown('<div class="app-version">نسخة v1.0</div>', unsafe_allow_html=True)
 
 # ==========================================
@@ -142,7 +165,7 @@ if menu_option == "الرئيسية":
     # فحص النصوص
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown("### ✍️ فحص نصوص المنشور")
-    post_content = st.text_area("نص المنشور:", height=130, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area")
+    post_content = st.text_area("نص المنشور:", height=120, placeholder="اكتب نص الإعلان أو المنشور هنا...", key="text_input_area")
 
     if st.button("🔍 ابدأ فحص النص العميق", key="btn_text_scan"):
         if not post_content.strip():
@@ -256,5 +279,5 @@ elif menu_option == "راسل التطبيق":
     """)
     st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
+st.markdown('<hr class="custom-divider-dark">', unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray; font-size: 0.85rem;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
