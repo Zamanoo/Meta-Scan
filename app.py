@@ -13,7 +13,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS مصمم لفرض ظهور جميع الأزرار بشكل متناسق وموحد
+# CSS مصمم لتنسيق إخلاء المسؤولية وكافة عناصر التطبيق
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -85,7 +85,27 @@ html, body, [class*='css'] {
     margin: 8px 0;
 }
 
-/* توحيد تنسيق كافة الأزرار لتظهر بشكل بارز وأزرق ومتكامل */
+/* صندوق إخلاء المسؤولية المنسق */
+.disclaimer-box {
+    background-color: rgba(30, 41, 59, 0.7);
+    border-right: 4px solid #f59e0b;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    direction: rtl;
+    text-align: right;
+    line-height: 1.5;
+}
+.disclaimer-title {
+    font-weight: bold;
+    color: #fbbf24;
+    margin-bottom: 3px;
+    font-size: 0.85rem;
+}
+
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -270,4 +290,13 @@ elif menu_option == "راسل التطبيق":
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<hr class="custom-divider-dark">', unsafe_allow_html=True)
+
+# عبارة إخلاء المسؤولية المطلوبة قبل الحقوق
+st.markdown("""
+<div class="disclaimer-box">
+    <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
+    "هذه النتائج تقديرية مبنية على معايير المجتمع من شركة Meta وليس قرارًا رسميًا من Meta".
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
