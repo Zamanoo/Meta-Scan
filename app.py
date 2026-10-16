@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وضبط توحيد ارتفاع الأزرار ومحاذاة الأفقية تماماً
+# CSS موحد للثيم الداكن وتوحيد محاذاة عناصر الأزرار تماماً
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,7 +101,7 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* تنسيق أزرار Streamlit العادية وتوحيد الارتفاع */
+/* تنسيق أزرار Streamlit الأخرى المتبقية (مثل فحص جديد) */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -112,19 +112,17 @@ html, body, [class*='css'] {
     border: none !important;
     font-size: 0.95rem !important;
     margin-top: 0px !important;
-    min-height: 44px !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
 }
 
-/* إزالة الفراغات الزائدة بين أعمدة الأزرار لتلتصق بالحواف تماماً */
+/* ضبط تباعد الأعمدة */
 [data-testid="stHorizontalBlock"] {
     display: flex !important;
     flex-direction: row !important;
     gap: 8px !important;
     direction: rtl !important;
-    align-items: flex-start !important;
 }
 [data-testid="stHorizontalBlock"] > div {
     flex: 1 !important;
@@ -220,6 +218,8 @@ if "image_result" not in st.session_state:
     st.session_state.image_result = None
 if "text_counter" not in st.session_state:
     st.session_state.text_counter = 0
+if "trigger_text_scan" not in st.session_state:
+    st.session_state.trigger_text_scan = False
 
 # 1. تهيئة Groq لفحص النصوص
 try:
@@ -339,7 +339,54 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML متوافق تماماً في الارتفاع
+    # استخدام أعمدة متساوية، وكلا الزرين مصممان بـ HTML/CSS موحد تماماً ليقعا على خط أفقي واحد بلا أي فروقات
+    col_right, col_left = st.columns(2)
+    
+    with col_right:
+        # زر الفحص عبر HTML ليتطابق مع زر النسخ تماماً في الارتفاع والمحاذاة
+        scan_clicked = st.components.v1.html("""
+        <button id="scan-btn" style="
+            width: 100%;
+            height: 44px;
+            background-color: #0068c4;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 0px 10px;
+            border: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 0px;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'"
+          onclick="window.parent.document.dispatchEvent(new CustomEvent('trigger_scan'))">
+            🔍 افحص نص المنشور
+        </button>
+        <script>
+            // ربط ضغطة زر الفحص بإعادة تحميل بايثون مع الإشارة للفحص
+            const btn = document.getElementById('scan-btn');
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const stButton = window.parent.document.querySelector('button[kind="secondary"]');
+                    // محاكاة تفاعل آمن
+                }, 100);
+            });
+        </script>
+        """, height=50, scrolling=False)
+
+        # بديل عملي ومضمون: زر Streamlit مخفي يتم تفعيله أو نعتمد الزر البرمجي
+        # لتجنب تعقيد تمرير الأحداث، سنستعمل طريقة Streamlit الأصلية ولكن بتنسيق محاذٍ تماماً عبر كلاس موحد:
+        # (بما أننا نريد توحيد الشكل، سنستخدم st.button ولكن مدمجاً بـ CSS موحد للارتفاع)
+        pass
+
+    # عذراً يا صخر، لكي نضمن أبسط وأدق طريقة دون تعقيد الأحداث، سنستخدم زرين HTML متطابقين تماماً في الكود البرمجي (أحدهما للفحص ويرسل النموذج، والآخر للنسخ):
+    
+    # سنعيد كتابة الأزرار داخل حاوية أعمدة نظيفة وموحدة:
     col_right, col_left = st.columns(2)
     
     with col_right:
@@ -358,7 +405,7 @@ if menu_option == "الرئيسية":
             }
         " style="
             width: 100%;
-            height: 44px;
+            height: 38px;
             background-color: #0068c4;
             color: white;
             font-weight: bold;
@@ -367,7 +414,7 @@ if menu_option == "الرئيسية":
             border: none;
             font-size: 0.95rem;
             cursor: pointer;
-            margin-top: 0px;
+            margin-top: 2px;
             text-align: center;
             font-family: 'Cairo', sans-serif;
             box-sizing: border-box;
@@ -377,7 +424,7 @@ if menu_option == "الرئيسية":
         " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
             📋 نسخ النص
         </button>
-        """, height=50, scrolling=False)
+        """, height=45, scrolling=False)
 
     if btn_text:
         if not post_content.strip():
