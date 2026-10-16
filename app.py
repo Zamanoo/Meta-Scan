@@ -14,7 +14,7 @@ from local_filter import SUSPICIOUS_KEYWORDS
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن وتوحيد محاذاة أزرار الأعمدة أفقياً تماماً
+# CSS موحد للثيم الداكن وضبط محاذاة الأزرار والمربعات بدقة تامة للحواف
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -101,30 +101,28 @@ html, body, [class*='css'] {
     font-size: 0.85rem;
 }
 
-/* توحيد خصائص وارتفاع الأزرار تماماً لتكون على خط أفقي واحد بدون فروقات */
+/* تنسيق أزرار Streamlit العادية */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
     color: #ffffff !important;
     font-weight: bold !important;
     border-radius: 8px !important;
-    padding: 8px 10px !important;
+    padding: 10px !important;
     border: none !important;
     font-size: 0.95rem !important;
     margin-top: 0px !important;
-    min-height: 42px !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
 }
 
-/* محاذاة بلوك الأعمدة لمنع أي انزياح رأسي */
+/* إزالة الفراغات الزائدة بين أعمدة الأزرار لتلتصق بالحواف تماماً */
 [data-testid="stHorizontalBlock"] {
     display: flex !important;
     flex-direction: row !important;
     gap: 8px !important;
     direction: rtl !important;
-    align-items: center !important;
 }
 [data-testid="stHorizontalBlock"] > div {
     flex: 1 !important;
@@ -339,43 +337,42 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص الإعلان أو المنشور هنا...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # إضافة معرف فريد لحقل الإدخال عبر JS لضمان سهولة الوصول إليه للنسخ
-    st.components.v1.html("""
-        <script>
-            const textarea = window.parent.document.querySelector('textarea');
-            if (textarea) {
-                textarea.id = 'post-textarea-main';
-            }
-        </script>
-    """, height=0)
-
-    # توزيع الأعمدة بشكل متساوٍ (اليمين للفحص، اليسار للنسخ)
+    # توزيع الأعمدة: اليمين لزر الفحص التقليدي، اليسار لزر نسخ بـ HTML مع رفع الزر قليلاً (-6px) ليتطابق تماماً مع مستوى زر الفحص
     col_right, col_left = st.columns(2)
     
     with col_right:
         btn_text = st.button("🔍 افحص نص المنشور", key="btn_text_scan")
         
     with col_left:
-        # زر النسخ البرمجي مع تشغيل جافاسكريبت للنسخ الفوري
-        btn_copy = st.button("📋 نسخ النص", key="btn_text_copy_native")
-
-    # تنفيذ النسخ عند الضغط على زر نسخ النص البرمجي
-    if btn_copy:
         st.components.v1.html("""
-            <script>
-                const textarea = window.parent.document.querySelector('#post-textarea-main') || 
-                                 window.parent.document.querySelector('textarea');
-                if (textarea && textarea.value.trim() !== '') {
-                    navigator.clipboard.writeText(textarea.value).then(() => {
-                        alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
-                    }).catch(err => {
-                        console.error('Copy failed:', err);
-                    });
-                } else {
-                    alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
-                }
-            </script>
-        """, height=0)
+        <button onclick="
+            const textarea = window.parent.document.querySelector('textarea');
+            if (textarea && textarea.value.trim() !== '') {
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    alert('✅ تم نسخ النص إلى الحافظة بنجاح!');
+                }).catch(err => {
+                    alert('❌ تعذر النسخ، يرجى السماح للمتصفح بالوصول للحافظة');
+                });
+            } else {
+                alert('⚠️ صندوق الإدخال فارغ، لا يوجد نص لنسخه!');
+            }
+        " style="
+            width: 100%;
+            background-color: #0068c4;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 10px;
+            border: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: -6px;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+        " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
+            📋 نسخ النص
+        </button>
+        """, height=44, scrolling=False)
 
     if btn_text:
         if not post_content.strip():
