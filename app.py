@@ -287,14 +287,15 @@ div[class*="viewerBadge"] {
 </script>
 """, unsafe_allow_html=True)
 
+# تهيئة حالة الجلسة
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
     st.session_state.image_result = None
 if "text_counter" not in st.session_state:
     st.session_state.text_counter = 0
-if "obfuscated_text" not in st.session_state:
-    st.session_state.obfuscated_text = ""
+if "user_post_text" not in st.session_state:
+    st.session_state.user_post_text = ""
 
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
@@ -407,7 +408,18 @@ if menu_option == "الرئيسية":
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
-    post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص المنشور هنا ...", key=dynamic_text_key, label_visibility="collapsed")
+    
+    # ربط مربع النص بـ session_state للتحديث المباشر عند التشكيل
+    post_content = st.text_area(
+        "نص المنشور:", 
+        value=st.session_state.user_post_text, 
+        height=80, 
+        placeholder="اكتب نص المنشور هنا ...", 
+        key=dynamic_text_key, 
+        label_visibility="collapsed"
+    )
+    # مزامنة القيمة المدخلة أولاً بأول
+    st.session_state.user_post_text = post_content
 
     col_right, col_left = st.columns(2)
     
@@ -474,7 +486,6 @@ if menu_option == "الرئيسية":
                     )
 
                     st.session_state.text_result = completion.choices[0].message.content
-                    st.session_state.obfuscated_text = ""
                     st.success("✅ تم فحص النص بنجاح!")
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
@@ -483,23 +494,22 @@ if menu_option == "الرئيسية":
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
 
-        found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
+        found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in st.session_state.user_post_text]
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
             
+            # عند الضغط على زر التشكيل، يتم تعديل قيمة المربع الأصلي مباشرة
             if st.button("✨ تشكيل وتعديل الكلمات المخالفة", key="btn_obfuscate_text"):
-                st.session_state.obfuscated_text = obfuscate_specific_words(post_content, found_local_words)
-                st.success("✨ تم تطبيق التشكيل والتلغيم على الكلمات المخالفة بنجاح!")
-
-        if st.session_state.get("obfuscated_text"):
-            st.markdown('<div style="margin-top: 10px; font-weight: 600; color: #60a5fa;">النص بعد التشكيل والتلغيم:</div>', unsafe_allow_html=True)
-            st.text_area("النص المُموّه:", value=st.session_state.obfuscated_text, height=80, key="obfuscated_display_area", label_visibility="collapsed")
+                obfuscated = obfuscate_specific_words(st.session_state.user_post_text, found_local_words)
+                st.session_state.user_post_text = obfuscated
+                st.session_state.text_counter += 1  # تجديد مفتاح المربع لفرض إظهار النص الجديد
+                st.rerun()
 
         display_formatted_report(raw_result)
 
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
-            st.session_state.obfuscated_text = ""
+            st.session_state.user_post_text = ""
             st.session_state.text_counter += 1
             st.rerun()
 
