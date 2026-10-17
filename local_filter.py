@@ -45,5 +45,5 @@ def obfuscate_specific_words(text, forbidden_words):
             # إضافة كشيدة ونقطة بين أحرف الكلمة المخالفة فقط
             obfuscated = "ـ.ـ".join(list(word))
             modified_text = modified_text.replace(word, obfuscated)
-            
+
     return modified_text
