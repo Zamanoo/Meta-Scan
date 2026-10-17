@@ -10,7 +10,7 @@ import re
 from groq import Groq
 import google.generativeai as genai
 from PIL import Image
-from local_filter import SUSPICIOUS_KEYWORDS
+from local_filter import SUSPICIOUS_KEYWORDS, obfuscate_specific_words
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
@@ -241,7 +241,6 @@ div[class*="viewerBadge"] {
 </style>
 
 <script>
-    // سكربت إخفاء شريط إدارة التطبيق فور تحميل الصفحة
     const hideStatusWidget = () => {
         const widgets = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], div[class*="StatusWidget"], div[class*="viewerBadge"]');
         widgets.forEach(w => w.style.display = 'none');
@@ -257,6 +256,8 @@ if "image_result" not in st.session_state:
     st.session_state.image_result = None
 if "text_counter" not in st.session_state:
     st.session_state.text_counter = 0
+if "obfuscated_text" not in st.session_state:
+    st.session_state.obfuscated_text = ""
 
 # 1. تهيئة Groq لفحص النصوص
 try:
@@ -307,7 +308,6 @@ def analyze_image_with_gemini_rotation(image, prompt):
     raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح والموديلات المتاحة: {last_error}")
 
 def render_status_badge(text_content):
-    """دالة قراءة حالة التقييم ورسم المؤشر البصري الخاص بها"""
     if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
         st.markdown('''
         <div class="status-card status-safe">
@@ -331,7 +331,6 @@ def render_status_badge(text_content):
         ''', unsafe_allow_html=True)
 
 def display_formatted_report(raw_text):
-    """دالة معالجة نص التقرير وعرضه بعناوين HTML بارزة ومفصولة تماماً"""
     clean_text = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_text).strip()
     
     parts = re.split(r'(خلاصة الفحص والتقييم العام|التقرير التفصيلي والكلمات الحساسة|البديل الموصى به والمتوافق|فحص الشخصيات والعناصر المرئية|التوصيات والتعديلات المطلوبة)', clean_text)
@@ -376,7 +375,6 @@ if menu_option == "الرئيسية":
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     post_content = st.text_area("نص المنشور:", height=80, placeholder="اكتب نص المنشور هنا ...", key=dynamic_text_key, label_visibility="collapsed")
 
-    # توزيع الأعمدة: اليمين لزر الفحص، اليسار لزر نسخ بـ HTML مع سُمك بارز 700 وحجم 0.92rem
     col_right, col_left = st.columns(2)
     
     with col_right:
@@ -417,7 +415,6 @@ if menu_option == "الرئيسية":
         if not post_content.strip():
             st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
         else:
-            found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
             with st.spinner("جاري تحليل النص وإعداد التقرير..."):
                 try:
                     system_prompt = (
@@ -443,6 +440,7 @@ if menu_option == "الرئيسية":
                     )
 
                     st.session_state.text_result = completion.choices[0].message.content
+                    st.session_state.obfuscated_text = "" # إعادة تعيين عند الفحص الجديد
                     st.success("✅ تم فحص النص بنجاح!")
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
@@ -455,11 +453,22 @@ if menu_option == "الرئيسية":
         found_local_words = [w for words in SUSPICIOUS_KEYWORDS.values() for w in words if w in post_content]
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
+            
+            # زر تشكيل وتعديل الكلمات المخالفة المكتشفة محلياً بتنسيق أزرار التطبيق الموحد
+            if st.button("✨ تشكيل وتعديل الكلمات المخالفة", key="btn_obfuscate_text"):
+                st.session_state.obfuscated_text = obfuscate_specific_words(post_content, found_local_words)
+                st.success("✨ تم تطبيق التشكيل والتلغيم على الكلمات المخالفة بنجاح!")
+
+        # إظهار صندوق النص المُموّه إذا تم تنشيطه
+        if st.session_state.get("obfuscated_text"):
+            st.markdown('<div style="margin-top: 10px; font-weight: 600; color: #60a5fa;">النص بعد التشكيل والتلغيم:</div>', unsafe_allow_html=True)
+            st.text_area("النص المُموّه:", value=st.session_state.obfuscated_text, height=80, key="obfuscated_display_area", label_visibility="collapsed")
 
         display_formatted_report(raw_result)
 
         if st.button("🔄 فحص نص جديد", key="reset_text_btn"):
             st.session_state.text_result = None
+            st.session_state.obfuscated_text = ""
             st.session_state.text_counter += 1
             st.rerun()
 
@@ -515,7 +524,6 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # عبارة إخلاء المسؤولية وحقوق النشر تظهر حصرياً في الشاشة الرئيسية وعند نتائج الفحص
     st.markdown("""
     <div class="disclaimer-box">
         <div class="disclaimer-title">تنويه إخلاء مسؤولية ⚠️</div>
