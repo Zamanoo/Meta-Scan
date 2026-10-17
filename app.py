@@ -10,11 +10,56 @@ import re
 from groq import Groq
 import google.generativeai as genai
 from PIL import Image
-from local_filter import SUSPICIOUS_KEYWORDS, obfuscate_specific_words
 
 st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# CSS موحد للثيم الداكن، إخفاء جميع أشرطة وأدوات Streamlit بما فيها شريط إدارة التطبيق
+# ------------------------------------------------------------------
+# القاموس المحلي للكلمات المشبوهة والدالة الخاصة بالتمويه
+# ------------------------------------------------------------------
+SUSPICIOUS_KEYWORDS = {
+    "financial": [
+        "ربح سريع", "ثراء فاحش", "ضعف أموالك", "استثمار مضمون", "بدون مجهود", 
+        "دخل اضافي مضمون", "قرض فوري بدون ضمانات", "ربح مضمون 100%"
+    ],
+    "health": [
+        "علاج سحري", "خسارة الوزن بدون ديّت", "نتيجة مضمونة خلال أيام", 
+        "شفاء تام", "مرخص طبياً (بدون إثبات)", "دواء معجزة"
+    ],
+    "behavioral": [
+        "اضغط هنا فوراً", "لا تفوت الفرصة", "الربح للجميع", "سارع قبل نفاد الكمية (وهمي)",
+        "اكسب آلاف الدولارات يومياً"
+    ],
+    "political_and_sensitive": [
+        "الحوثيون", "أنصار الله", "جماعة الحوثي", 
+        "المجلس الانتقالي الجنوبي", 
+        "الانقلاب", "الانقلابيون", "الصراع اليمني", "الحرب في اليمن", "الهدنة", 
+        "المعتقلون السياسيون", "الأسرى", "السجناء السياسيون", 
+        "الاختفاء القسري", "الاعتقالات", "القمع", "حرية التعبير", "الاحتجاجات الشعبية", 
+        "المظاهرات", "العصيان المدني", "الحوثي", "تقسيم اليمن", "الانفصال",  "انصار الله", 
+        "الوحدة اليمنية", "القضية الجنوبية", "النفوذ الإيراني", "النفوذ السعودي", 
+        "التجنيد", "التجنيد الإجباري", "الألغام", "انتهاكات حقوق الإنسان", 
+        "فلسطين", "غزة", "الضفة الغربية", "القدس", "إسرائيل", "الاحتلال الإسرائيلي", 
+        "المقاومة الفلسطينية", "حماس", "الجهاد الإسلامي", "حزب الله", "حزب اللات", 
+        "المقاومة المسلحة", "هتلر", "النازية", "القتال", "الاقتتال", "الحرب",  "خامنئي",  
+        "سحل", "الأسلحة النووية", "استشهاد", "الشهيد", "الموت لأمريكا",  "السينوار", 
+        "الموت لامريكا", "الموت لإسرائيل", "الموت لأسرائيل", "الموت لاسرائيل", 
+        "اللعنة على اليهود", "اللعنه على اليهود"
+    ]
+}
+
+def obfuscate_specific_words(text, forbidden_words):
+    """
+    تقوم بتمويه الكلمات المخالفة فقط داخل النص عبر إضافة الكشيدة والنقاط بين أحرفها
+    """
+    modified_text = text
+    for word in forbidden_words:
+        if word in modified_text:
+            obfuscated = "ـ.ـ".join(list(word))
+            modified_text = modified_text.replace(word, obfuscated)
+            
+    return modified_text
+
+# CSS موحد للثيم الداكن، إخفاء جميع أشرطة وأدوات Streamlit
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -41,12 +86,10 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* ضبط الفراغات الرأسية للعناصر بالقيمة -0.2rem */
 .stElementContainer {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء القائمة الجانبية، الشريط العلوي، أدوات Streamlit وشريط "إدارة التطبيق" المضمن بكل الطرق الفعالة */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -127,7 +170,6 @@ div[class*="viewerBadge"] {
     font-size: 0.85rem;
 }
 
-/* توحيد حجم وسُمك الخط في جميع أزرار Streamlit ليصبح Bold بارز (700) وبحجم 0.92rem */
 .stButton>button {
     width: 100% !important;
     background-color: #0068c4 !important;
@@ -147,7 +189,6 @@ div[class*="viewerBadge"] {
     color: #ffffff !important;
 }
 
-/* إزالة الفراغات الزائدة بين أعمدة الأزرار لتلتصق بالحواف تماماً */
 [data-testid="stHorizontalBlock"] {
     display: flex !important;
     flex-direction: row !important;
@@ -171,7 +212,6 @@ div[class*="viewerBadge"] {
     text-align: right !important;
 }
 
-/* بطاقات مؤشرات النتيجة التفاعلية */
 .status-card {
     padding: 12px 16px;
     border-radius: 10px;
@@ -202,7 +242,6 @@ div[class*="viewerBadge"] {
     color: #f87171 !important;
 }
 
-/* حاوية التقارير وتنسيق العناوين البارزة الزرقاء */
 .report-container {
     direction: rtl !important;
     text-align: right !important;
@@ -221,7 +260,6 @@ div[class*="viewerBadge"] {
     display: block !important;
 }
 
-/* إصلاح لقوائم الترقيم والنقاط للبدء من اليمين تماماً */
 .rtl-menu-content {
     direction: rtl !important;
     text-align: right !important;
@@ -249,7 +287,6 @@ div[class*="viewerBadge"] {
 </script>
 """, unsafe_allow_html=True)
 
-# تهيئة إدارة الحالة (Session State)
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
@@ -259,7 +296,6 @@ if "text_counter" not in st.session_state:
 if "obfuscated_text" not in st.session_state:
     st.session_state.obfuscated_text = ""
 
-# 1. تهيئة Groq لفحص النصوص
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
     groq_client = Groq(api_key=groq_key)
@@ -267,7 +303,6 @@ except Exception as e:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
-# 2. التقاط جميع مفاتيح Gemini تلقائياً
 gemini_keys = []
 for k in st.secrets.keys():
     if "GEMINI" in k.upper():
@@ -368,7 +403,6 @@ menu_option = st.selectbox(
 if menu_option == "الرئيسية":
     st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>تطبيق ذكي لفحص النصوص والصور لتجنب قيود ميتا</p></div>', unsafe_allow_html=True)
 
-    # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
@@ -440,12 +474,11 @@ if menu_option == "الرئيسية":
                     )
 
                     st.session_state.text_result = completion.choices[0].message.content
-                    st.session_state.obfuscated_text = "" # إعادة تعيين عند الفحص الجديد
+                    st.session_state.obfuscated_text = ""
                     st.success("✅ تم فحص النص بنجاح!")
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء الاتصال بنظام الفحص: {e}")
 
-    # عرض النتائج المعالجة برمجياً
     if st.session_state.text_result:
         raw_result = st.session_state.text_result
         render_status_badge(raw_result)
@@ -454,12 +487,10 @@ if menu_option == "الرئيسية":
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
             
-            # زر تشكيل وتعديل الكلمات المخالفة المكتشفة محلياً بتنسيق أزرار التطبيق الموحد
             if st.button("✨ تشكيل وتعديل الكلمات المخالفة", key="btn_obfuscate_text"):
                 st.session_state.obfuscated_text = obfuscate_specific_words(post_content, found_local_words)
                 st.success("✨ تم تطبيق التشكيل والتلغيم على الكلمات المخالفة بنجاح!")
 
-        # إظهار صندوق النص المُموّه إذا تم تنشيطه
         if st.session_state.get("obfuscated_text"):
             st.markdown('<div style="margin-top: 10px; font-weight: 600; color: #60a5fa;">النص بعد التشكيل والتلغيم:</div>', unsafe_allow_html=True)
             st.text_area("النص المُموّه:", value=st.session_state.obfuscated_text, height=80, key="obfuscated_display_area", label_visibility="collapsed")
@@ -474,7 +505,6 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -511,7 +541,6 @@ if menu_option == "الرئيسية":
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
-    # عرض نتائج فحص الصورة المعالجة برمجياً
     if st.session_state.image_result:
         res_text = st.session_state.image_result
         render_status_badge(res_text)
@@ -611,4 +640,3 @@ elif menu_option == "راسل التطبيق":
     </div>
     ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
