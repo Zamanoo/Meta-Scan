@@ -322,34 +322,46 @@ def encode_image_to_base64(image):
     return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
 def analyze_image_with_llama_vision(image, prompt):
-    """دالة فحص الصورة باستخدام LLaMA 3.2 Vision عبر Groq كنموذج مساند"""
+    """دالة فحص الصورة باستخدام نماذج LLaMA 3.2 Vision المحدثة عبر Groq"""
     base64_image = encode_image_to_base64(image)
-    chat_completion = groq_client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
+    
+    # القائمة المحدثة بالنماذج المدعومة من Groq بعد إيقاف النسخة التجريبية
+    vision_models = ["llama-3.2-11b-vision-instruct", "llama-3.2-90b-vision-instruct"]
+    last_err = None
+
+    for model_name in vision_models:
+        try:
+            chat_completion = groq_client.chat.completions.create(
+                messages=[
                     {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        },
-                    },
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                },
+                            },
+                        ],
+                    }
                 ],
-            }
-        ],
-        model="llama-3.2-11b-vision-preview",
-        temperature=0.2,
-        max_tokens=1024
-    )
-    return chat_completion.choices[0].message.content
+                model=model_name,
+                temperature=0.2,
+                max_tokens=1024
+            )
+            return chat_completion.choices[0].message.content
+        except Exception as err:
+            last_err = err
+            continue
+
+    raise last_err
 
 def analyze_image_multi_model(image, prompt):
     """
     دالة فحص هجينة متطورة:
     1. تحاول الفحص أولاً عبر Gemini 1.5 الفائق.
-    2. في حال تعثر Gemini تبادلياً، تنتقل فوراً وبسلاسة إلى LLaMA 3.2 Vision عبر Groq.
+    2. في حال تعثر Gemini تبادلياً، تنتقل فوراً وبسلاسة إلى LLaMA 3.2 Vision المحدث عبر Groq.
     """
     last_error = None
 
