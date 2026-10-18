@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------
-# META SCAN Application
+# Post SCAN Application
 # Copyright (c) 2026 Sakhr AlHubaish. All Rights Reserved.
 # Proprietary and Confidential - Developed for Meta Compliance Scanning
 # ------------------------------------------------------------------
@@ -13,7 +13,7 @@ from groq import Groq
 import google.generativeai as genai
 from PIL import Image
 
-st.set_page_config(page_title="META SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Post SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
 # ------------------------------------------------------------------
 # القاموس المحلي للكلمات المشبوهة والدالة الخاصة بالتمويه
@@ -399,7 +399,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>تطبيق ذكي لفحص النصوص والصور لتجنب قيود ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ Post SCAN</h1><p>تطبيق ذكي لفحص النصوص والصور لتجنب قيود ميتا</p></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -566,14 +566,14 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم تطوير النظام بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم برمجة التطبيق بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
 
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">📖 دليل معايير مجتمع Meta</div>', unsafe_allow_html=True)
     st.markdown('''
     <div class="rtl-menu-content">
-        <p>يعتمد فاحص <b>META SCAN</b> على تحليل المحتوى وفقاً لأبرز بنود السياسة والمعايير المعتمدة التالية من Meta:</p>
+        <p>يعتمد فاحص <b>POST SCAN</b> على تحليل المحتوى وفقاً لأبرز بنود السياسة والمعايير المعتمدة التالية من Meta:</p>
         <ol>
             <li><b>العنف والتحريض:</b> منع الترويج للأعمال العنفية، التهديدات، أو الأسلحة.</li>
             <li><b>خطاب الكراهية:</b> محاربة الهجوم على الأفراد أو المجموعات بناءً على العرق، الدين، الجنس.</li>
@@ -600,7 +600,7 @@ elif menu_option == "سياسة الخصوصية":
     st.markdown('<div class="section-title">🔒 سياسة الخصوصية</div>', unsafe_allow_html=True)
     st.markdown('''
     <div class="rtl-menu-content">
-        <p>نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية في تطبيق <b>META SCAN</b>:</p>
+        <p>نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية في تطبيق <b>POST SCAN</b>:</p>
         <ol>
             <li>التطبيق لا يطلب أي معلومات شخصية ولا يتطلب إنشاء حساب ولا يقوم بتخزين أي نصوص أو صور.</li>
             <li>تتم معالجة النصوص والصور عبر واجهات برمجية آمنة وموثوقة.</li>
