@@ -313,82 +313,32 @@ for k in st.secrets.keys():
         if isinstance(val, str) and val.strip():
             gemini_keys.append(val.strip())
 
-def encode_image_to_base64(image):
-    """تحويل الصورة إلى ترميز Base64 لاستخدامها مع Groq"""
-    buffered = BytesIO()
-    if image.mode in ("RGBA", "P"):
-        image = image.convert("RGB")
-    image.save(buffered, format="JPEG")
-    return base64.b64encode(buffered.getvalue()).decode('utf-8')
+def analyze_image_with_gemini(image, prompt):
+    """دالة فحص الصورة عبر Gemini باستطاعة الموديلات الحالية المحدثة"""
+    global gemini_keys
+    if not gemini_keys:
+        raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
-def analyze_image_with_llama_vision(image, prompt):
-    """دالة فحص الصورة باستخدام نماذج Groq Vision الشغالة حالياً"""
-    base64_image = encode_image_to_base64(image)
-    
-    # أسماء الموديلات النشطة لرؤية الصور في Groq
-    vision_models = ["llama-3.2-11b-vision-instruct", "llama-3.2-11b-vision", "meta-llama/llama-3.2-11b-vision-instruct"]
     last_err = None
+    candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash']
 
-    for model_name in vision_models:
+    for api_key in gemini_keys:
         try:
-            chat_completion = groq_client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64_image}"
-                                },
-                            },
-                        ],
-                    }
-                ],
-                model=model_name,
-                temperature=0.2,
-                max_tokens=1024
-            )
-            return chat_completion.choices[0].message.content
-        except Exception as err:
-            last_err = err
+            genai.configure(api_key=api_key)
+            for model_name in candidate_models:
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content([image, prompt])
+                    if response and response.text:
+                        return response.text
+                except Exception as m_err:
+                    last_err = m_err
+                    continue
+        except Exception as k_err:
+            last_err = k_err
             continue
 
-    raise last_err
-
-def analyze_image_multi_model(image, prompt):
-    """
-    دالة فحص هجينة متطورة:
-    1. تحاول الفحص أولاً عبر Gemini 1.5.
-    2. في حال تعثر Gemini تنتقل فوراً للنموذج المساعد عبر Groq.
-    """
-    last_error = None
-
-    # المحاولة 1: استخدام Gemini أولاً
-    if gemini_keys:
-        for api_key in gemini_keys:
-            try:
-                genai.configure(api_key=api_key)
-                candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro-vision-latest']
-                for model_name in candidate_models:
-                    try:
-                        model = genai.GenerativeModel(model_name)
-                        response = model.generate_content([image, prompt])
-                        if response and response.text:
-                            return response.text
-                    except Exception as ge:
-                        last_error = ge
-                        continue
-            except Exception as e:
-                last_error = str(e)
-                continue
-
-    # المحاولة 2: الانتقال للنموذج المساعد LLaMA Vision فوراً عند التعثر
-    try:
-        return analyze_image_with_llama_vision(image, prompt)
-    except Exception as llama_err:
-        raise Exception(f"تعذر معالجة الصورة. تأكد من صلاحيات المفاتيح أو جرب مرة أخرى. التفاصيل: {llama_err}")
+    raise Exception(f"فشل فحص Gemini: {last_err}")
 
 def render_status_badge(text_content):
     if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
@@ -590,10 +540,10 @@ if menu_option == "الرئيسية":
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
 
-                    st.session_state.image_result = analyze_image_multi_model(image, image_prompt)
+                    st.session_state.image_result = analyze_image_with_gemini(image, image_prompt)
                     st.success("✅ تم الفحص البصري بنجاح!")
                 except Exception as e:
-                    st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
+                    st.error(f"❌ تعذر معالجة الصورة عبر محرك الفحص: {e}")
     else:
         st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
