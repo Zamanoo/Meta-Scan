@@ -314,13 +314,13 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستطاعة الموديلات الحالية المحدثة"""
+    """دالة فحص الصورة عبر Gemini باستخدام النموذج المحدث gemini-3.8-flash والموديلات الرسمية المدعومة"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
     last_err = None
-    candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash']
+    candidate_models = ['gemini-3.8-flash', 'gemini-1.5-flash', 'gemini-1.5-pro']
 
     for api_key in gemini_keys:
         try:
