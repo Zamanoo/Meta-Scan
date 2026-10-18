@@ -314,7 +314,7 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def encode_image_to_base64(image):
-    """تحويل الصورة إلى ترميز Base64 لاستخدامها مع LLaMA Vision عبر Groq"""
+    """تحويل الصورة إلى ترميز Base64 لاستخدامها مع Groq"""
     buffered = BytesIO()
     if image.mode in ("RGBA", "P"):
         image = image.convert("RGB")
@@ -322,11 +322,11 @@ def encode_image_to_base64(image):
     return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
 def analyze_image_with_llama_vision(image, prompt):
-    """دالة فحص الصورة باستخدام نماذج LLaMA 3.2 Vision المحدثة عبر Groq"""
+    """دالة فحص الصورة باستخدام نماذج Groq Vision الشغالة حالياً"""
     base64_image = encode_image_to_base64(image)
     
-    # القائمة المحدثة بالنماذج المدعومة من Groq بعد إيقاف النسخة التجريبية
-    vision_models = ["llama-3.2-11b-vision-instruct", "llama-3.2-90b-vision-instruct"]
+    # أسماء الموديلات النشطة لرؤية الصور في Groq
+    vision_models = ["llama-3.2-11b-vision-instruct", "llama-3.2-11b-vision", "meta-llama/llama-3.2-11b-vision-instruct"]
     last_err = None
 
     for model_name in vision_models:
@@ -360,8 +360,8 @@ def analyze_image_with_llama_vision(image, prompt):
 def analyze_image_multi_model(image, prompt):
     """
     دالة فحص هجينة متطورة:
-    1. تحاول الفحص أولاً عبر Gemini 1.5 الفائق.
-    2. في حال تعثر Gemini تبادلياً، تنتقل فوراً وبسلاسة إلى LLaMA 3.2 Vision المحدث عبر Groq.
+    1. تحاول الفحص أولاً عبر Gemini 1.5.
+    2. في حال تعثر Gemini تنتقل فوراً للنموذج المساعد عبر Groq.
     """
     last_error = None
 
@@ -370,24 +370,25 @@ def analyze_image_multi_model(image, prompt):
         for api_key in gemini_keys:
             try:
                 genai.configure(api_key=api_key)
-                candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision']
+                candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro-vision-latest']
                 for model_name in candidate_models:
                     try:
                         model = genai.GenerativeModel(model_name)
                         response = model.generate_content([image, prompt])
                         if response and response.text:
                             return response.text
-                    except Exception:
+                    except Exception as ge:
+                        last_error = ge
                         continue
             except Exception as e:
                 last_error = str(e)
                 continue
 
-    # المحاولة 2: الانتقال للنموذج المساعد LLaMA 3.2 Vision فوراً عند التعثر
+    # المحاولة 2: الانتقال للنموذج المساعد LLaMA Vision فوراً عند التعثر
     try:
         return analyze_image_with_llama_vision(image, prompt)
     except Exception as llama_err:
-        raise Exception(f"تعذر معالجة الصورة عبر جميع النماذج (Gemini/LLaMA): {llama_err}")
+        raise Exception(f"تعذر معالجة الصورة. تأكد من صلاحيات المفاتيح أو جرب مرة أخرى. التفاصيل: {llama_err}")
 
 def render_status_badge(text_content):
     if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
@@ -572,7 +573,7 @@ if menu_option == "الرئيسية":
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
-            with st.spinner("جاري فحص الصورة عبر الذكاء الاصطناعي (Gemini + LLaMA Vision)..."):
+            with st.spinner("جاري فحص الصورة عبر الذكاء الاصطناعي..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
