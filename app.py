@@ -632,6 +632,8 @@ elif menu_option == "عن التطبيق":
     st.markdown('''
     <div class="rtl-menu-content">
         <p>تم برمجة وتطوير هذا التطبيق بواسطة <b>Sakhr AlHubaish</b> لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.</p>
+ <p> v1.0 اصدار التطبيق  </p>
+
     </div>
     ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
