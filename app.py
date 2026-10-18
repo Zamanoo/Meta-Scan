@@ -7,6 +7,8 @@
 import streamlit as st
 import os
 import re
+import base64
+from io import BytesIO
 from groq import Groq
 import google.generativeai as genai
 from PIL import Image
@@ -48,9 +50,7 @@ SUSPICIOUS_KEYWORDS = {
 }
 
 def obfuscate_specific_words(text, forbidden_words):
-    """
-    تقوم بتمويه الكلمات المخالفة فقط داخل النص عبر إضافة الكشيدة والنقاط بين أحرفها
-    """
+    """تقوم بتمويه الكلمات المخالفة فقط داخل النص عبر إضافة الكشيدة والنقاط بين أحرفها"""
     modified_text = text
     for word in forbidden_words:
         if word in modified_text:
@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS موحد للثيم الداكن، إخفاء جميع أشرطة وأدوات Streamlit
+# CSS موحد للثيم الداكن وإخفاء جميع أشرطة Streamlit
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -297,6 +297,7 @@ if "text_counter" not in st.session_state:
 if "user_post_text" not in st.session_state:
     st.session_state.user_post_text = ""
 
+# تهيئة Groq
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
     groq_client = Groq(api_key=groq_key)
@@ -304,6 +305,7 @@ except Exception as e:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
+# تهيئة Gemini Keys
 gemini_keys = []
 for k in st.secrets.keys():
     if "GEMINI" in k.upper():
@@ -311,37 +313,69 @@ for k in st.secrets.keys():
         if isinstance(val, str) and val.strip():
             gemini_keys.append(val.strip())
 
-if not gemini_keys:
-    st.error("⚠️ تنبيه أمني: لم يتم العثور على أي مفتاح GEMINI في إعدادات المنصة (Secrets).")
-    st.stop()
+def encode_image_to_base64(image):
+    """تحويل الصورة إلى ترميز Base64 لاستخدامها مع LLaMA Vision عبر Groq"""
+    buffered = BytesIO()
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
+    image.save(buffered, format="JPEG")
+    return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-def analyze_image_with_gemini_rotation(image, prompt):
-    global gemini_keys
+def analyze_image_with_llama_vision(image, prompt):
+    """دالة فحص الصورة باستخدام LLaMA 3.2 Vision عبر Groq كنموذج مساند"""
+    base64_image = encode_image_to_base64(image)
+    chat_completion = groq_client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        },
+                    },
+                ],
+            }
+        ],
+        model="llama-3.2-11b-vision-preview",
+        temperature=0.2,
+        max_tokens=1024
+    )
+    return chat_completion.choices[0].message.content
+
+def analyze_image_multi_model(image, prompt):
+    """
+    دالة فحص هجينة متطورة:
+    1. تحاول الفحص أولاً عبر Gemini 1.5 الفائق.
+    2. في حال تعثر Gemini تبادلياً، تنتقل فوراً وبسلاسة إلى LLaMA 3.2 Vision عبر Groq.
+    """
     last_error = None
 
-    for api_key in gemini_keys:
-        try:
-            genai.configure(api_key=api_key)
-            candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision', 'gemini-pro']
-            response = None
-            for model_name in candidate_models:
-                try:
-                    model = genai.GenerativeModel(model_name)
-                    response = model.generate_content([image, prompt])
-                    if response and response.text:
-                        break
-                except Exception:
-                    continue
-            if response and response.text:
-                return response.text
-        except Exception as e:
-            last_error = str(e)
-            if "429" in str(e) or "ResourceExhausted" in str(e):
-                continue
-            else:
+    # المحاولة 1: استخدام Gemini أولاً
+    if gemini_keys:
+        for api_key in gemini_keys:
+            try:
+                genai.configure(api_key=api_key)
+                candidate_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro-vision']
+                for model_name in candidate_models:
+                    try:
+                        model = genai.GenerativeModel(model_name)
+                        response = model.generate_content([image, prompt])
+                        if response and response.text:
+                            return response.text
+                    except Exception:
+                        continue
+            except Exception as e:
+                last_error = str(e)
                 continue
 
-    raise Exception(f"تعذر معالجة الصورة عبر جميع المفاتيح والموديلات المتاحة: {last_error}")
+    # المحاولة 2: الانتقال للنموذج المساعد LLaMA 3.2 Vision فوراً عند التعثر
+    try:
+        return analyze_image_with_llama_vision(image, prompt)
+    except Exception as llama_err:
+        raise Exception(f"تعذر معالجة الصورة عبر جميع النماذج (Gemini/LLaMA): {llama_err}")
 
 def render_status_badge(text_content):
     if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
@@ -404,12 +438,12 @@ menu_option = st.selectbox(
 if menu_option == "الرئيسية":
     st.markdown('<div class="main-header"><h1>🛡️ META SCAN</h1><p>تطبيق ذكي لفحص النصوص والصور لتجنب قيود ميتا</p></div>', unsafe_allow_html=True)
 
+    # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
     dynamic_text_key = f"text_input_area_{st.session_state.text_counter}"
     
-    # ربط مربع النص بـ session_state للتحديث المباشر عند التشكيل
     post_content = st.text_area(
         "نص المنشور:", 
         value=st.session_state.user_post_text, 
@@ -418,7 +452,6 @@ if menu_option == "الرئيسية":
         key=dynamic_text_key, 
         label_visibility="collapsed"
     )
-    # مزامنة القيمة المدخلة أولاً بأول
     st.session_state.user_post_text = post_content
 
     col_right, col_left = st.columns(2)
@@ -498,11 +531,10 @@ if menu_option == "الرئيسية":
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
             
-            # عند الضغط على زر التشكيل، يتم تعديل قيمة المربع الأصلي مباشرة
             if st.button("✨ تشكيل وتعديل الكلمات المخالفة", key="btn_obfuscate_text"):
                 obfuscated = obfuscate_specific_words(st.session_state.user_post_text, found_local_words)
                 st.session_state.user_post_text = obfuscated
-                st.session_state.text_counter += 1  # تجديد مفتاح المربع لفرض إظهار النص الجديد
+                st.session_state.text_counter += 1
                 st.rerun()
 
         display_formatted_report(raw_result)
@@ -515,6 +547,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -527,7 +560,7 @@ if menu_option == "الرئيسية":
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
-            with st.spinner("جاري فحص الصورة والتعرف على العناصر..."):
+            with st.spinner("جاري فحص الصورة عبر الذكاء الاصطناعي (Gemini + LLaMA Vision)..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
@@ -544,7 +577,7 @@ if menu_option == "الرئيسية":
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
 
-                    st.session_state.image_result = analyze_image_with_gemini_rotation(image, image_prompt)
+                    st.session_state.image_result = analyze_image_multi_model(image, image_prompt)
                     st.success("✅ تم الفحص البصري بنجاح!")
                 except Exception as e:
                     st.error(f"❌ حدث خطأ أثناء فحص الصورة: {e}")
