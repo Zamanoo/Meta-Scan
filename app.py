@@ -60,7 +60,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS موحد للثيم الداكن وإخفاء جميع أشرطة Streamlit
+# CSS موحد للثيم الداكن وإخفاء جميع أشرطة وشعارات Streamlit العائمة
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -101,13 +101,24 @@ header,
 footer,
 .stDeployButton,
 div[class*="StatusWidget"],
-div[class*="viewerBadge"] {
+div[class*="viewerBadge"],
+div[class*="styles-module_container"],
+div[class*="reportview-container"] footer,
+a[href*="streamlit.cloud"],
+.viewerBadge {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
     width: 0 !important;
     opacity: 0 !important;
     pointer-events: none !important;
+}
+
+/* إخفاء الشريط السفلي العائم الخاص بـ Streamlit بالكامل للأجهزة المحمولة */
+iframe ~ div, div:has(> a[href*="streamlit.io"]), div:has(> span:contains("تم بناؤه")) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
 .main-header {
@@ -281,10 +292,14 @@ div[class*="viewerBadge"] {
 
 <script>
     const hideStatusWidget = () => {
-        const widgets = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], div[class*="StatusWidget"], div[class*="viewerBadge"]');
+        const widgets = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], div[class*="StatusWidget"], div[class*="viewerBadge"], footer');
         widgets.forEach(w => w.style.display = 'none');
+        // إزالة الشريط السفلي العائم من الصفحة الأم إن وجد
+        const parentDoc = window.parent.document;
+        const badges = parentDoc.querySelectorAll('div[class*="viewerBadge"], footer, header');
+        badges.forEach(b => b.style.display = 'none');
     };
-    setInterval(hideStatusWidget, 500);
+    setInterval(hideStatusWidget, 300);
 </script>
 """, unsafe_allow_html=True)
 
@@ -633,8 +648,7 @@ elif menu_option == "عن التطبيق":
     st.markdown('''
     <div class="rtl-menu-content">
         <p>تم برمجة وتطوير هذا التطبيق بواسطة <b>Sakhr AlHubaish</b> لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.</p>
- <p> v1.0 اصدار التطبيق  </p>
-
+        <p>v1.0 اصدار التطبيق</p>
     </div>
     ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
