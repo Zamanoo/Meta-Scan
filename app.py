@@ -41,7 +41,7 @@ SUSPICIOUS_KEYWORDS = {
         "الوحدة اليمنية", "القضية الجنوبية", "النفوذ الإيراني", "النفوذ السعودي", 
         "التجنيد", "التجنيد الإجباري", "الانظمة العربية", "انتهاكات حقوق الإنسان", 
         "فلسطين", "غزة","شعار الصرخة", "الضفة الغربية", "القدس", "إسرائيل", "الاحتلال الإسرائيلي", 
-        "المقاومة الفلسطينية", "حماس", "الجهاد الإسلامي", "حزب الله", "حزب اللات", 
+        "المقاومة الفلسطينية", "حماس", "الجهة الإسلامية", "حزب الله", "حزب اللات", 
         "المقاومة المسلحة", "هتلر", "النازية", "القتال", "الاقتتال", "الحرب",  "خامنئي",  
         "سحل", "الأسلحة النووية", "استشهاد", "الشهيد", "الموت لأمريكا",  "السينوار", 
         "الموت لامريكا", "الموت لإسرائيل", "الموت لأسرائيل", "الموت لاسرائيل", 
@@ -60,7 +60,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS موحد للثيم الداكن وإخفاء جميع أشرطة وشعارات Streamlit العائمة
+# CSS موحد للثيم الداكن وإخفاء جميع أشرطة وشعارات وأزرار Streamlit العائمة
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -91,11 +91,13 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
+/* إخفاء القوائم والأيقونات والأزرار العائمة بالكامل */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
 [data-testid="stHeader"],
 [data-testid="stToolbar"],
+[data-testid="stManageApp"],
 #MainMenu,
 header,
 footer,
@@ -105,7 +107,9 @@ div[class*="viewerBadge"],
 div[class*="styles-module_container"],
 div[class*="reportview-container"] footer,
 a[href*="streamlit.cloud"],
-.viewerBadge {
+.viewerBadge,
+button[title*="Viewer"],
+[data-testid="stSidebarCollapsedControl"] {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
@@ -114,11 +118,13 @@ a[href*="streamlit.cloud"],
     pointer-events: none !important;
 }
 
-/* إخفاء الشريط السفلي العائم الخاص بـ Streamlit بالكامل للأجهزة المحمولة */
-iframe ~ div, div:has(> a[href*="streamlit.io"]), div:has(> span:contains("تم بناؤه")) {
+/* إخفاء الزر العائم والشعار السفلي في أجهزة المحمول */
+#root > div:nth-child(2),
+div:has(> a[href*="streamlit"]),
+div:has(> img[src*="streamlit"]),
+div[style*="z-index: 999999"] {
     display: none !important;
     visibility: hidden !important;
-    opacity: 0 !important;
 }
 
 .main-header {
@@ -291,15 +297,29 @@ iframe ~ div, div:has(> a[href*="streamlit.io"]), div:has(> span:contains("تم 
 </style>
 
 <script>
-    const hideStatusWidget = () => {
-        const widgets = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], div[class*="StatusWidget"], div[class*="viewerBadge"], footer');
-        widgets.forEach(w => w.style.display = 'none');
-        // إزالة الشريط السفلي العائم من الصفحة الأم إن وجد
-        const parentDoc = window.parent.document;
-        const badges = parentDoc.querySelectorAll('div[class*="viewerBadge"], footer, header');
-        badges.forEach(b => b.style.display = 'none');
+    const cleanStreamlitElements = () => {
+        const doc = window.parent.document;
+        // إخفاء الأزرار والأيقونات في الصفحة الأم (Parent Window)
+        const selectors = [
+            '[data-testid="stStatusWidget"]',
+            '[data-testid="stManageApp"]',
+            'div[class*="viewerBadge"]',
+            'footer',
+            'header',
+            '#MainMenu',
+            '.stAppBadge',
+            'div[class*="styles-module_container"]'
+        ];
+        
+        selectors.forEach(selector => {
+            const elements = doc.querySelectorAll(selector);
+            elements.forEach(el => {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+            });
+        });
     };
-    setInterval(hideStatusWidget, 300);
+    setInterval(cleanStreamlitElements, 200);
 </script>
 """, unsafe_allow_html=True)
 
@@ -648,7 +668,7 @@ elif menu_option == "عن التطبيق":
     st.markdown('''
     <div class="rtl-menu-content">
         <p>تم برمجة وتطوير هذا التطبيق بواسطة <b>Sakhr AlHubaish</b> لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.</p>
-        <p>v1.0 اصدار التطبيق</p>
+        <p>اصدار التطبيق v1.0 </p>
     </div>
     ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
