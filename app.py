@@ -435,7 +435,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><p>تطبيق ذكي لفحص النصوص والصور لتجنب قيود ميتا</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><center><p>تطبيق فاحص المنشورات الذكي للتعرف على المخاطر المحتملة قبل النشر، أستناداً إلى معايير Meta</p></center></div>', unsafe_allow_html=True)
 
     # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
@@ -530,7 +530,7 @@ if menu_option == "الرئيسية":
         if found_local_words:
             st.markdown(f'<div class="local-warning"><b>⚠️ تنبيه من المساعد المحلي:</b> تم رصد مصطلحات دقيقة محلياً: <code>{", ".join(found_local_words)}</code></div>', unsafe_allow_html=True)
             
-            if st.button("✨ تشكيل وتعديل الكلمات المخالفة", key="btn_obfuscate_text"):
+            if st.button("✨ تشكيل وتعديل النص", key="btn_obfuscate_text"):
                 obfuscated = obfuscate_specific_words(st.session_state.user_post_text, found_local_words)
                 st.session_state.user_post_text = obfuscated
                 st.session_state.text_counter += 1
@@ -559,7 +559,7 @@ if menu_option == "الرئيسية":
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
-            with st.spinner("جاري فحص الصورة عبر الذكاء الاصطناعي..."):
+            with st.spinner("جاري فحص الصورة عبر نماذج مساعدة..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
