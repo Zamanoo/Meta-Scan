@@ -317,7 +317,7 @@ except Exception:
 gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام النماذج المحدثة والمعتمدة"""
+    """دالة فحص الصورة عبر Gemini باستخدام أحدث النماذج المعتمدة لضمان عدم ظهور خطأ 404"""
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
@@ -340,8 +340,8 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # استخدام النماذج الحديثة الموصى بها من جوجل بالترتيب
-    candidate_models = ["gemini-3.8-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    # استخدام أحدث النماذج الرسمية المتاحة للطلب المباشر في واجهة v1beta
+    candidate_models = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-1.5-flash"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
