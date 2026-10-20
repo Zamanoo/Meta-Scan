@@ -295,7 +295,7 @@ button[title*="Viewer"],
 }
 .preview-card img {
     max-width: 100%;
-    max-height: 260px;
+    max-height: 320px;
     border-radius: 6px;
     object-fit: contain;
     display: block;
@@ -355,17 +355,28 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini مع معالجة حماية نظام ألوان الصور"""
+    """دالة فحص الصورة عبر Gemini مع معالجة الأبعاد العالية والحفاظ على وضوح التفاصيل"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
-    # ضمان نظام الألوان RGB
     if image.mode != "RGB":
         image = image.convert("RGB")
 
+    # الحفاظ على أبعاد عالية واضحة (حتى 1600 بكسل كحد أقصى للجانب الأكبر لضمان السرعة والوضوح التام)
+    max_dimension = 1600
+    width, height = image.size
+    if width > max_dimension or height > max_dimension:
+        if width > height:
+            new_width = max_dimension
+            new_height = int(height * (max_dimension / width))
+        else:
+            new_height = max_dimension
+            new_width = int(width * (max_dimension / height))
+        image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
     buffered = BytesIO()
-    image.save(buffered, format="JPEG")
+    image.save(buffered, format="JPEG", quality=90)
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
@@ -579,7 +590,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور مع المعاينة العالية الأمان
+    # 2. قسم فحص صور المنشور بدقة عالية (أكبر من 1024)
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -588,15 +599,14 @@ if menu_option == "الرئيسية":
     if uploaded_image:
         image = Image.open(uploaded_image)
         
-        # تحويل الألوان للسلامة
         if image.mode != "RGB":
             preview_img = image.convert("RGB")
         else:
             preview_img = image
 
-        # تحويل الصورة إلى Base64 لعرضها المباشر الآمن
+        # معاينة دقيقة ومباشرة
         buf = BytesIO()
-        preview_img.save(buf, format="JPEG")
+        preview_img.save(buf, format="JPEG", quality=95)
         preview_base64 = base64.b64encode(buf.getvalue()).decode()
 
         st.markdown(f'''
@@ -609,11 +619,11 @@ if menu_option == "الرئيسية":
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
-            with st.spinner("جاري فحص الصورة عبر الذكاء الاصطناعي..."):
+            with st.spinner("جاري فحص الصورة بدقة عالية عبر الذكاء الاصطناعي..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
-                        "قم بتحليل الصورة، ويجب وضع حالة النتيجة في السطر الأول تماماً كالتالي:\n"
+                        "قم بتحليل الصورة بدقة عالية، ويجب وضع حالة النتيجة في السطر الأول تماماً كالتالي:\n"
                         "إذا كانت الصورة آمنة تماماً: STATUS: SAFE\n"
                         "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
                         "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
