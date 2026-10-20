@@ -350,13 +350,14 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام النموذج المحدث gemini-3.8-flash والموديلات الرسمية المدعومة"""
+    """دالة فحص الصورة عبر Gemini باستخدام النماذج الرسمية والمستقرة المدعومة"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
     last_err = None
-    candidate_models = ['gemini-3.8-flash', 'gemini-1.5-flash', 'gemini-1.5-pro']
+    # قائمة النماذج المحدثة والرسمية المقبولة تفادياً لأخطاء 404
+    candidate_models = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3.8-flash', 'gemini-1.5-flash']
 
     for api_key in gemini_keys:
         try:
