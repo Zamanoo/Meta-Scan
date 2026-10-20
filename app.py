@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS المنسق والنظيف بالكامل للثيم الداكن
+# CSS منظم ونظيف (تم إزالة المكتنفات والملفات غير الفعالة مع الحفاظ على التناسق البصري)
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -75,10 +75,7 @@ html, body, [class*='css'] {
 }
 
 .block-container {
-    padding-top: 1rem !important;
-    padding-bottom: 0.5rem !important;
-    padding-left: 0.8rem !important;
-    padding-right: 0.8rem !important;
+    padding: 1rem 0.8rem 0.5rem 0.8rem !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div {
@@ -90,7 +87,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء عناصر واجهة Streamlit غير الضرورية */
+/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -143,8 +140,6 @@ button[title*="Viewer"],
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     margin-bottom: 10px;
-    direction: rtl !important;
-    text-align: right !important;
 }
 
 .section-title {
@@ -152,8 +147,6 @@ button[title*="Viewer"],
     font-weight: 700 !important;
     color: #ffffff !important;
     margin-bottom: 8px;
-    direction: rtl !important;
-    text-align: right !important;
 }
 
 .disclaimer-box {
@@ -161,12 +154,9 @@ button[title*="Viewer"],
     border-right: 4px solid #f59e0b !important;
     padding: 8px 12px;
     border-radius: 6px;
-    margin-top: 2px;
-    margin-bottom: 6px;
+    margin: 2px 0 6px 0;
     font-size: 0.82rem;
     color: #cbd5e1 !important;
-    direction: rtl !important;
-    text-align: right !important;
     line-height: 1.4;
 }
 .disclaimer-title {
@@ -185,10 +175,7 @@ button[title*="Viewer"],
     padding: 10px !important;
     border: none !important;
     font-size: 0.92rem !important;
-    margin-top: 0px !important;
     font-family: 'Cairo', sans-serif !important;
-    box-sizing: border-box !important;
-    text-align: center !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
@@ -199,7 +186,6 @@ button[title*="Viewer"],
     display: flex !important;
     flex-direction: row !important;
     gap: 8px !important;
-    direction: rtl !important;
 }
 [data-testid="stHorizontalBlock"] > div {
     flex: 1 !important;
@@ -214,8 +200,6 @@ button[title*="Viewer"],
     color: #856404;
     margin-top: 8px;
     font-size: 0.85rem;
-    direction: rtl !important;
-    text-align: right !important;
 }
 
 .status-card {
@@ -227,7 +211,6 @@ button[title*="Viewer"],
     display: flex;
     align-items: center;
     justify-content: space-between;
-    direction: rtl !important;
 }
 
 .status-safe {
@@ -249,8 +232,6 @@ button[title*="Viewer"],
 }
 
 .report-container {
-    direction: rtl !important;
-    text-align: right !important;
     color: #f8fafc;
     line-height: 1.7;
     font-size: 0.95rem;
@@ -261,25 +242,15 @@ button[title*="Viewer"],
     font-weight: 700 !important;
     margin-top: 16px !important;
     margin-bottom: 6px !important;
-    direction: rtl !important;
-    text-align: right !important;
     display: block !important;
 }
 
-.rtl-menu-content {
-    direction: rtl !important;
-    text-align: right !important;
-}
 .rtl-menu-content ol, .rtl-menu-content ul {
-    direction: rtl !important;
-    text-align: right !important;
     padding-right: 1.5rem !important;
     padding-left: 0rem !important;
     margin-right: 0rem !important;
 }
 .rtl-menu-content li {
-    direction: rtl !important;
-    text-align: right !important;
     margin-bottom: 6px !important;
 }
 
@@ -288,8 +259,7 @@ button[title*="Viewer"],
     border: 1px solid #334155;
     border-radius: 8px;
     padding: 8px;
-    margin-top: 6px;
-    margin-bottom: 10px;
+    margin: 6px 0 10px 0;
     text-align: center;
 }
 .preview-card img {
@@ -301,6 +271,28 @@ button[title*="Viewer"],
     margin: 0 auto;
 }
 </style>
+
+<script>
+    const cleanStreamlitElements = () => {
+        const doc = window.parent.document;
+        const selectors = [
+            '[data-testid="stStatusWidget"]',
+            '[data-testid="stManageApp"]',
+            'div[class*="viewerBadge"]',
+            'footer',
+            'header',
+            '#MainMenu',
+            '.stAppBadge'
+        ];
+        selectors.forEach(selector => {
+            doc.querySelectorAll(selector).forEach(el => {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+            });
+        });
+    };
+    setInterval(cleanStreamlitElements, 200);
+</script>
 """, unsafe_allow_html=True)
 
 # تهيئة حالة الجلسة
@@ -327,7 +319,7 @@ except Exception:
 gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة محسنة وسريعة لفحص الصور عبر Gemini باستخدام النموذج الفعال"""
+    """دالة فحص الصورة عبر Gemini مع تحسين الأداء وسرعة الاستجابة"""
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
@@ -350,7 +342,6 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # الاعتماد المباشر والسريع على النموذج المستقر
     active_model = "gemini-2.5-flash"
 
     for api_key in gemini_keys:
@@ -445,7 +436,7 @@ menu_option = st.selectbox(
 if menu_option == "الرئيسية":
     st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><center><p>تطبيق فاحص المنشورات الذكي للتعرف على المخاطر المحتملة قبل النشر، أستناداً إلى معايير Meta</p></center></div>', unsafe_allow_html=True)
 
-    # 1. فحص النصوص
+    # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
@@ -554,7 +545,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. فحص الصور
+    # 2. قسم فحص صور المنشور مع تحسين أداء حلقة المعاينة والرفع
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -564,10 +555,7 @@ if menu_option == "الرئيسية":
     if uploaded_image:
         image = Image.open(uploaded_image)
         
-        if image.mode != "RGB":
-            preview_img = image.convert("RGB")
-        else:
-            preview_img = image
+        preview_img = image.convert("RGB") if image.mode != "RGB" else image
 
         buf = BytesIO()
         preview_img.save(buf, format="JPEG", quality=95)
