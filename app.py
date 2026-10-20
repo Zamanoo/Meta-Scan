@@ -348,7 +348,7 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر ونماذج gemini-2.5 و gemini-3.5 الحديثة"""
+    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر ونماذج gemini-2.5 المحدثة"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
@@ -358,8 +358,7 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # استخدام النماذج المستقرة الحالية المعرفّة رسمياً على الخوادم
-    candidate_models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3.5-flash-lite"]
+    candidate_models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
@@ -569,7 +568,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور
+    # 2. قسم فحص صور المنشور مع ميزة المعاينة المصغرة (Thumbnail Preview)
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -577,12 +576,15 @@ if menu_option == "الرئيسية":
 
     if uploaded_image:
         image = Image.open(uploaded_image)
-        st.image(image, caption="الصورة المرفوعة للفحص", use_column_width=True)
+        
+        # معاينة الصورة المصغرة قبل الفحص
+        st.markdown('<p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px; margin-bottom: 4px;">معاينة الصورة المختارة:</p>', unsafe_allow_html=True)
+        st.image(image, use_column_width=True)
 
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
         if btn_image:
-            with st.spinner("جاري فحص الصورة عبر نماذج مساعدة..."):
+            with st.spinner("جاري فحص الصورة عبر الذكاء الاصطناعي..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
