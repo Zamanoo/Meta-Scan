@@ -355,10 +355,14 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر ونماذج gemini-2.5 و gemini-3.5 الحديثة"""
+    """دالة فحص الصورة عبر Gemini مع معالجة حماية نظام ألوان الصور"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
+
+    # ضمان نظام الألوان RGB
+    if image.mode != "RGB":
+        image = image.convert("RGB")
 
     buffered = BytesIO()
     image.save(buffered, format="JPEG")
@@ -575,7 +579,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور
+    # 2. قسم فحص صور المنشور مع المعاينة العالية الأمان
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -584,9 +588,15 @@ if menu_option == "الرئيسية":
     if uploaded_image:
         image = Image.open(uploaded_image)
         
-        # تحويل الصورة إلى Base64 لعرضها المباشر الآمن عبر HTML تجنباً لمشاكل CSS
+        # تحويل الألوان للسلامة
+        if image.mode != "RGB":
+            preview_img = image.convert("RGB")
+        else:
+            preview_img = image
+
+        # تحويل الصورة إلى Base64 لعرضها المباشر الآمن
         buf = BytesIO()
-        image.save(buf, format="JPEG")
+        preview_img.save(buf, format="JPEG")
         preview_base64 = base64.b64encode(buf.getvalue()).decode()
 
         st.markdown(f'''
