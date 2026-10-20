@@ -340,7 +340,6 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # استخدام أحدث النماذج الرسمية المتاحة للطلب المباشر في واجهة v1beta
     candidate_models = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-1.5-flash"]
 
     for api_key in gemini_keys:
@@ -545,7 +544,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور
+    # 2. قسم فحص صور المنشور مع التحقق البرمجي للتنبيه
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -568,9 +567,13 @@ if menu_option == "الرئيسية":
         </div>
         ''', unsafe_allow_html=True)
 
-        btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
+    btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
-        if btn_image:
+    if btn_image:
+        if not uploaded_image:
+            st.warning("⚠️ الرجاء اختيار صورة المنشور أولاً.")
+        else:
+            image = Image.open(uploaded_image)
             with st.spinner("جاري فحص الصورة بدقة عالية عبر الذكاء الاصطناعي..."):
                 try:
                     image_prompt = (
@@ -592,8 +595,6 @@ if menu_option == "الرئيسية":
                     st.success("✅ تم الفحص البصري بنجاح!")
                 except Exception as e:
                     st.error(f"❌ تعذر معالجة الصورة عبر محرك الفحص: {e}")
-    else:
-        st.button("🔍 افحص صورة المنشور", key="btn_image_scan_disabled", disabled=True)
 
     if st.session_state.image_result:
         res_text = st.session_state.image_result
