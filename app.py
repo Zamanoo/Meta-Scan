@@ -10,7 +10,7 @@ import re
 import base64
 from io import BytesIO
 from groq import Groq
-import google.generativeai as genai
+import requests
 from PIL import Image
 
 st.set_page_config(page_title="Post SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
@@ -21,7 +21,7 @@ st.set_page_config(page_title="Post SCAN", page_icon="🛡️", layout="centered
 SUSPICIOUS_KEYWORDS = {
     "financial": [
         "ربح سريع", "ثراء فاحش", "ضعف أموالك", "استثمار مضمون", "بدون مجهود", 
-        "دخل اضافي مضمون", "قرض فوري بدون ضمانات", "ربح مضمون 100%"
+        "دخل اضافي مضمون", "قرض fوري بدون ضمانات", "ربح مضمون 100%"
     ],
     "health": [
         "علاج سحري", "خسارة الوزن بدون ديّت", "نتيجة مضمونة خلال أيام", 
@@ -46,7 +46,6 @@ SUSPICIOUS_KEYWORDS = {
         "سحل", "الأسلحة النووية", "استشهاد", "الشهيد", "الموت لأمريكا",  "السينوار", 
         "الموت لامريكا", "الموت لإسرائيل", "الموت لأسرائيل", "الموت لاسرائيل", 
         "اللعنة على اليهود", "اللعنه على اليهود"
-
     ]
 }
 
@@ -340,7 +339,7 @@ except Exception as e:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
-# تهيئة Gemini Keys
+# استخراج مفاتيح Gemini Keys من Secrets
 gemini_keys = []
 for k in st.secrets.keys():
     if "GEMINI" in k.upper():
@@ -349,32 +348,57 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام النماذج المعتمدة والمدعومة حالياً"""
+    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر عبر REST API لتجنب أي مشاكل في المكتبة"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
+    # تحويل الصورة إلى صيغة Base64 لإرسالها عبر الطلب المباشر
+    buffered = BytesIO()
+    image.save(buffered, format="JPEG")
+    img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
     last_err = None
-    # قائمة النماذج القياسية المتوافقة مع واجهة الاستدعاء الحالية
-    candidate_models = ['gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-pro-vision', 'gemini-1.5-flash']
+    # النماذج القياسية التي تدعم الوسائط البصرية في إصدارات API المباشرة
+    candidate_models = ["gemini-1.5-flash", "gemini-1.5-pro"]
 
     for api_key in gemini_keys:
-        try:
-            genai.configure(api_key=api_key)
-            for model_name in candidate_models:
-                try:
-                    model = genai.GenerativeModel(model_name)
-                    response = model.generate_content([image, prompt])
-                    if response and response.text:
-                        return response.text
-                except Exception as m_err:
-                    last_err = m_err
-                    continue
-        except Exception as k_err:
-            last_err = k_err
-            continue
+        for model_name in candidate_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt},
+                            {
+                                "inline_data": {
+                                    "mime_type": "image/jpeg",
+                                    "data": img_base64
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+            try:
+                response = requests.post(url, headers=headers, json=payload, timeout=30)
+                if response.status_code == 200:
+                    res_json = response.json()
+                    candidates = res_json.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            text_output = parts[0].get("text", "")
+                            if text_output:
+                                return text_output
+                else:
+                    last_err = response.text
+            except Exception as e:
+                last_err = e
+                continue
 
-    raise Exception(f"فشل فحص Gemini: {last_err}")
+    raise Exception(f"فشل الاتصال بخدمة Gemini المباشرة: {last_err}")
 
 def render_status_badge(text_content):
     if "STATUS: SAFE" in text_content or "حالة المحتوى: آمن" in text_content or "غير مخالف" in text_content and "STATUS: DANGER" not in text_content and "STATUS: WARNING" not in text_content:
