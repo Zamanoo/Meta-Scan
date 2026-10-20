@@ -348,7 +348,7 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر ونماذج gemini-2.5 المحدثة"""
+    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر ونماذج gemini-2.5 و gemini-3.5 الحديثة"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
@@ -358,8 +358,8 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # النماذج الرسمية الحديثة والمستقرة المدعومة في الاستدعاء المباشر الحالي
-    candidate_models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"]
+    # استخدام النماذج المستقرة الحالية المعرفّة رسمياً على الخوادم
+    candidate_models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3.5-flash-lite"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
