@@ -335,8 +335,6 @@ if "image_result" not in st.session_state:
 st.session_state.image_result = None
 if "text_counter" not in st.session_state:
 st.session_state.text_counter = 0
-if "image_counter" not in st.session_state:
-st.session_state.image_counter = 0
 if "user_post_text" not in st.session_state:
 st.session_state.user_post_text = ""
 
@@ -365,6 +363,7 @@ raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 if image.mode != "RGB":
 image = image.convert("RGB")
 
+# الحفاظ على أبعاد عالية واضحة (حتى 1600 بكسل كحد أقصى للجانب الأكبر لضمان السرعة والوضوح التام)
 max_dimension = 1600
 width, height = image.size
 if width > max_dimension or height > max_dimension:
@@ -591,12 +590,11 @@ st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# 2. قسم فحص صور المنشور مع مفتاح ديناميكي نظيف
+# 2. قسم فحص صور المنشور بدقة عالية (أكبر من 1024)
 st.markdown('<div class="section-box">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
-dynamic_image_key = f"image_upload_area_{st.session_state.image_counter}"
-uploaded_image = st.file_uploader("اختر ملف الصورة (PNG, JPG, JPEG):", type=["png", "jpg", "jpeg"], key=dynamic_image_key, label_visibility="collapsed")
+uploaded_image = st.file_uploader("اختر ملف الصورة (PNG, JPG, JPEG):", type=["png", "jpg", "jpeg"], key="image_upload_area", label_visibility="collapsed")
 
 if uploaded_image:
 image = Image.open(uploaded_image)
@@ -606,6 +604,7 @@ preview_img = image.convert("RGB")
 else:
 preview_img = image
 
+# معاينة دقيقة ومباشرة
 buf = BytesIO()
 preview_img.save(buf, format="JPEG", quality=95)
 preview_base64 = base64.b64encode(buf.getvalue()).decode()
@@ -652,7 +651,6 @@ display_formatted_report(res_text)
 
 if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
 st.session_state.image_result = None
-st.session_state.image_counter += 1
 st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
@@ -745,3 +743,4 @@ st.markdown('''
 </div>
 ''', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
+
