@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS موحد للثيم الداكن وتصحيح استهداف العناصر المنسقة
+# CSS المنسق والنظيف بالكامل للثيم الداكن
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -90,7 +90,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
+/* إخفاء عناصر واجهة Streamlit غير الضرورية */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -283,7 +283,6 @@ button[title*="Viewer"],
     margin-bottom: 6px !important;
 }
 
-/* تنسيق إطار الصورة المصغرة والمعاينة */
 .preview-card {
     background-color: #0f172a;
     border: 1px solid #334155;
@@ -302,30 +301,6 @@ button[title*="Viewer"],
     margin: 0 auto;
 }
 </style>
-
-<script>
-    const cleanStreamlitElements = () => {
-        const doc = window.parent.document;
-        const selectors = [
-            '[data-testid="stStatusWidget"]',
-            '[data-testid="stManageApp"]',
-            'div[class*="viewerBadge"]',
-            'footer',
-            'header',
-            '#MainMenu',
-            '.stAppBadge'
-        ];
-        
-        selectors.forEach(selector => {
-            const elements = doc.querySelectorAll(selector);
-            elements.forEach(el => {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-            });
-        });
-    };
-    setInterval(cleanStreamlitElements, 200);
-</script>
 """, unsafe_allow_html=True)
 
 # تهيئة حالة الجلسة
@@ -344,21 +319,15 @@ if "user_post_text" not in st.session_state:
 try:
     groq_key = st.secrets["GROQ_API_KEY"]
     groq_client = Groq(api_key=groq_key)
-except Exception as e:
+except Exception:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
     st.stop()
 
 # استخراج مفاتيح Gemini Keys من Secrets
-gemini_keys = []
-for k in st.secrets.keys():
-    if "GEMINI" in k.upper():
-        val = st.secrets[k]
-        if isinstance(val, str) and val.strip():
-            gemini_keys.append(val.strip())
+gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini مع معالجة الأبعاد العالية والحفاظ على وضوح التفاصيل"""
-    global gemini_keys
+    """دالة محسنة وسريعة لفحص الصور عبر Gemini باستخدام النموذج الفعال"""
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
@@ -381,43 +350,38 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    candidate_models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3.5-flash-lite"]
+    # الاعتماد المباشر والسريع على النموذج المستقر
+    active_model = "gemini-2.5-flash"
 
     for api_key in gemini_keys:
-        for model_name in candidate_models:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-            headers = {"Content-Type": "application/json"}
-            payload = {
-                "contents": [
-                    {
-                        "parts": [
-                            {"text": prompt},
-                            {
-                                "inline_data": {
-                                    "mime_type": "image/jpeg",
-                                    "data": img_base64
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-            try:
-                response = requests.post(url, headers=headers, json=payload, timeout=30)
-                if response.status_code == 200:
-                    res_json = response.json()
-                    candidates = res_json.get("candidates", [])
-                    if candidates:
-                        parts = candidates[0].get("content", {}).get("parts", [])
-                        if parts:
-                            text_output = parts[0].get("text", "")
-                            if text_output:
-                                return text_output
-                else:
-                    last_err = f"HTTP {response.status_code}: {response.text}"
-            except Exception as e:
-                last_err = e
-                continue
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{active_model}:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt},
+                        {"inline_data": {"mime_type": "image/jpeg", "data": img_base64}}
+                    ]
+                }
+            ]
+        }
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=25)
+            if response.status_code == 200:
+                res_json = response.json()
+                candidates = res_json.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        text_output = parts[0].get("text", "")
+                        if text_output:
+                            return text_output
+            else:
+                last_err = f"HTTP {response.status_code}: {response.text}"
+        except Exception as e:
+            last_err = e
+            continue
 
     raise Exception(f"فشل الاتصال بخدمة Gemini المباشرة: {last_err}")
 
@@ -446,7 +410,6 @@ def render_status_badge(text_content):
 
 def display_formatted_report(raw_text):
     clean_text = re.sub(r'STATUS:\s*(SAFE|WARNING|DANGER)', '', raw_text).strip()
-    
     parts = re.split(r'(خلاصة الفحص والتقييم العام|التقرير التفصيلي والكلمات الحساسة|البديل الموصى به والمتوافق|فحص الشخصيات والعناصر المرئية|التوصيات والتعديلات المطلوبة)', clean_text)
     
     html_output = '<div class="report-container">'
@@ -482,7 +445,7 @@ menu_option = st.selectbox(
 if menu_option == "الرئيسية":
     st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><center><p>تطبيق فاحص المنشورات الذكي للتعرف على المخاطر المحتملة قبل النشر، أستناداً إلى معايير Meta</p></center></div>', unsafe_allow_html=True)
 
-    # 1. قسم فحص نصوص المنشور
+    # 1. فحص النصوص
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
@@ -591,7 +554,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور مع مفتاح ديناميكي نظيف
+    # 2. فحص الصور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
