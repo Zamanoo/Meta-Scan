@@ -59,16 +59,17 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
+# تطبيق خط Rubik بجميع أوزانه على كافة عناصر التطبيق
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
 <link rel="apple-touch-icon" href="icon.png">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
 html, body, [class*='css'] {
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Rubik', sans-serif !important;
     direction: rtl !important;
     text-align: right !important;
 }
@@ -77,7 +78,8 @@ html, body, [class*='css'] {
     padding: 1rem 0.8rem 0.5rem 0.8rem !important;
 }
 
-.stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div {
+.stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
+    font-family: 'Rubik', sans-serif !important;
     direction: rtl !important;
     text-align: right !important;
 }
@@ -86,6 +88,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
+/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -120,13 +123,14 @@ button[title*="Viewer"],
 }
 .main-header h1 {
     font-size: 1.4rem;
+    font-weight: 800 !important;
     margin-bottom: 4px;
     text-align: center !important;
     color: #ffffff !important;
 }
 .main-header p {
     font-size: 0.98rem !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     margin: 0;
     text-align: center !important;
     color: #f8fafc !important;
@@ -154,11 +158,12 @@ button[title*="Viewer"],
     border-radius: 6px;
     margin: 2px 0 6px 0;
     font-size: 0.82rem;
+    font-weight: 400 !important;
     color: #cbd5e1 !important;
     line-height: 1.4;
 }
 .disclaimer-title {
-    font-weight: bold;
+    font-weight: 700 !important;
     color: #fbbf24 !important;
     margin-bottom: 2px;
     font-size: 0.85rem;
@@ -173,7 +178,7 @@ button[title*="Viewer"],
     padding: 10px !important;
     border: none !important;
     font-size: 0.92rem !important;
-    font-family: 'Cairo', sans-serif !important;
+    font-family: 'Rubik', sans-serif !important;
 }
 .stButton>button:hover {
     background-color: #004d99 !important;
@@ -198,12 +203,13 @@ button[title*="Viewer"],
     color: #856404;
     margin-top: 8px;
     font-size: 0.85rem;
+    font-weight: 500 !important;
 }
 
 .status-card {
     padding: 12px 16px;
     border-radius: 10px;
-    font-weight: bold;
+    font-weight: 700 !important;
     font-size: 1.1rem;
     margin-bottom: 12px;
     display: flex;
@@ -233,6 +239,7 @@ button[title*="Viewer"],
     color: #f8fafc;
     line-height: 1.7;
     font-size: 0.95rem;
+    font-weight: 400 !important;
 }
 .report-title-custom {
     color: #60a5fa !important;
@@ -250,6 +257,7 @@ button[title*="Viewer"],
 }
 .rtl-menu-content li {
     margin-bottom: 6px !important;
+    font-weight: 400 !important;
 }
 
 .preview-card {
@@ -317,7 +325,7 @@ except Exception:
 gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام أحدث النماذج المعتمدة لضمان عدم ظهور خطأ 404"""
+    """دالة فحص الصورة عبر Gemini باستخدام أحدث النماذج المعتمدة"""
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
@@ -481,7 +489,7 @@ if menu_option == "الرئيسية":
             cursor: pointer;
             margin-top: -10px;
             text-align: center;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Rubik', sans-serif;
         " onmouseover="this.style.backgroundColor='#004d99'" onmouseout="this.style.backgroundColor='#0068c4'">
             📋 نسخ النص
         </button>
@@ -544,7 +552,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور مع التحقق البرمجي للتنبيه
+    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
@@ -583,11 +591,11 @@ if menu_option == "الرئيسية":
                         "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
                         "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
                         "ثم اكتب التقرير بوضوح:\n"
-                        "خلاصة الفحص والتقييم العام\n"
+                        "خلاصة الفحص والتقييم العام:\n"
                         "(ملخص شامل وسريع عن حالة الصورة للقبول الإعلاني)\n\n"
-                        "فحص الشخصيات والعناصر المرئية\n"
+                        "فحص الشخصيات والعناصر المرئية:\n"
                         "(فحص الوجوه، الشخصيات العامة أو السياسية، الأسلحة، الرموز والشعارات)\n\n"
-                        "التوصيات والتعديلات المطلوبة\n"
+                        "التوصيات والتعديلات المطلوبة:\n"
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
 
