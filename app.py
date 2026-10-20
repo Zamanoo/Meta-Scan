@@ -21,7 +21,7 @@ st.set_page_config(page_title="Post SCAN", page_icon="🛡️", layout="centered
 SUSPICIOUS_KEYWORDS = {
     "financial": [
         "ربح سريع", "ثراء فاحش", "ضعف أموالك", "استثمار مضمون", "بدون مجهود", 
-        "دخل اضافي مضمون", "قرض fوري بدون ضمانات", "ربح مضمون 100%"
+        "دخل اضافي مضمون", "قرض فوري بدون ضمانات", "ربح مضمون 100%"
     ],
     "health": [
         "علاج سحري", "خسارة الوزن بدون ديّت", "نتيجة مضمونة خلال أيام", 
@@ -348,19 +348,18 @@ for k in st.secrets.keys():
             gemini_keys.append(val.strip())
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام الاتصال المباشر عبر REST API لتجنب أي مشاكل في المكتبة"""
+    """دالة فحص الصورة المحدثة والمباشرة بدون خطأ 404"""
     global gemini_keys
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
-    # تحويل الصورة إلى صيغة Base64 لإرسالها عبر الطلب المباشر
     buffered = BytesIO()
     image.save(buffered, format="JPEG")
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # النماذج القياسية التي تدعم الوسائط البصرية في إصدارات API المباشرة
-    candidate_models = ["gemini-1.5-flash", "gemini-1.5-pro"]
+    # نماذج Gemini المعتمدة والرسمية حالياً للوسائط
+    candidate_models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash-latest"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
@@ -393,7 +392,7 @@ def analyze_image_with_gemini(image, prompt):
                             if text_output:
                                 return text_output
                 else:
-                    last_err = response.text
+                    last_err = f"HTTP {response.status_code}: {response.text}"
             except Exception as e:
                 last_err = e
                 continue
