@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS موحد للثيم الداكن وإخفاء جميع أشرطة وشعارات وأزرار Streamlit العائمة
+# CSS موحد للثيم الداكن وتصحيح استهداف العناصر المنسقة
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -90,7 +90,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء القوائم والأيقونات والأزرار العائمة بالكامل */
+/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -103,8 +103,6 @@ footer,
 .stDeployButton,
 div[class*="StatusWidget"],
 div[class*="viewerBadge"],
-div[class*="styles-module_container"],
-div[class*="reportview-container"] footer,
 a[href*="streamlit.cloud"],
 .viewerBadge,
 button[title*="Viewer"],
@@ -115,15 +113,6 @@ button[title*="Viewer"],
     width: 0 !important;
     opacity: 0 !important;
     pointer-events: none !important;
-}
-
-/* إخفاء الزر العائم والشعار السفلي في أجهزة المحمول */
-#root > div:nth-child(2),
-div:has(> a[href*="streamlit"]),
-div:has(> img[src*="streamlit"]),
-div[style*="z-index: 999999"] {
-    display: none !important;
-    visibility: hidden !important;
 }
 
 .main-header {
@@ -293,6 +282,25 @@ div[style*="z-index: 999999"] {
     text-align: right !important;
     margin-bottom: 6px !important;
 }
+
+/* تنسيق إطار الصورة المصغرة والمعاينة */
+.preview-card {
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.preview-card img {
+    max-width: 100%;
+    max-height: 260px;
+    border-radius: 6px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
 </style>
 
 <script>
@@ -305,8 +313,7 @@ div[style*="z-index: 999999"] {
             'footer',
             'header',
             '#MainMenu',
-            '.stAppBadge',
-            'div[class*="styles-module_container"]'
+            '.stAppBadge'
         ];
         
         selectors.forEach(selector => {
@@ -326,8 +333,6 @@ if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
     st.session_state.image_result = None
-if "uploaded_image_file" not in st.session_state:
-    st.session_state.uploaded_image_file = None
 if "text_counter" not in st.session_state:
     st.session_state.text_counter = 0
 if "user_post_text" not in st.session_state:
@@ -570,20 +575,26 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور مع المعاينة المباشرة
+    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
     uploaded_image = st.file_uploader("اختر ملف الصورة (PNG, JPG, JPEG):", type=["png", "jpg", "jpeg"], key="image_upload_area", label_visibility="collapsed")
 
     if uploaded_image:
-        st.session_state.uploaded_image_file = uploaded_image
-
-    if st.session_state.uploaded_image_file:
-        image = Image.open(st.session_state.uploaded_image_file)
+        image = Image.open(uploaded_image)
         
-        st.markdown('<p style="font-size: 0.88rem; color: #60a5fa; font-weight: 600; margin-top: 4px; margin-bottom: 4px;">📷 معاينة الصورة المختارة:</p>', unsafe_allow_html=True)
-        st.image(image, width=280)
+        # تحويل الصورة إلى Base64 لعرضها المباشر الآمن عبر HTML تجنباً لمشاكل CSS
+        buf = BytesIO()
+        image.save(buf, format="JPEG")
+        preview_base64 = base64.b64encode(buf.getvalue()).decode()
+
+        st.markdown(f'''
+        <div class="preview-card">
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; text-align: right;">📷 معاينة الصورة المختارة:</p>
+            <img src="data:image/jpeg;base64,{preview_base64}" alt="Preview" />
+        </div>
+        ''', unsafe_allow_html=True)
 
         btn_image = st.button("🔍 افحص صورة المنشور", key="btn_image_scan")
 
@@ -620,7 +631,6 @@ if menu_option == "الرئيسية":
 
         if st.button("🔄 فحص صورة جديدة", key="reset_img_btn"):
             st.session_state.image_result = None
-            st.session_state.uploaded_image_file = None
             st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
