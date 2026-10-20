@@ -59,7 +59,6 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS منظم ونظيف (تم إزالة المكتنفات والملفات غير الفعالة مع الحفاظ على التناسق البصري)
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -87,7 +86,6 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -319,7 +317,7 @@ except Exception:
 gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini مع تحسين الأداء وسرعة الاستجابة"""
+    """دالة فحص الصورة عبر Gemini باستخدام النماذج المحدثة والمعتمدة"""
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
 
@@ -342,37 +340,39 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    active_model = "gemini-2.5-flash"
+    # استخدام النماذج الحديثة الموصى بها من جوجل بالترتيب
+    candidate_models = ["gemini-3.8-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
 
     for api_key in gemini_keys:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{active_model}:generateContent?key={api_key}"
-        headers = {"Content-Type": "application/json"}
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt},
-                        {"inline_data": {"mime_type": "image/jpeg", "data": img_base64}}
-                    ]
-                }
-            ]
-        }
-        try:
-            response = requests.post(url, headers=headers, json=payload, timeout=25)
-            if response.status_code == 200:
-                res_json = response.json()
-                candidates = res_json.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        text_output = parts[0].get("text", "")
-                        if text_output:
-                            return text_output
-            else:
-                last_err = f"HTTP {response.status_code}: {response.text}"
-        except Exception as e:
-            last_err = e
-            continue
+        for model_name in candidate_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt},
+                            {"inline_data": {"mime_type": "image/jpeg", "data": img_base64}}
+                        ]
+                    }
+                ]
+            }
+            try:
+                response = requests.post(url, headers=headers, json=payload, timeout=25)
+                if response.status_code == 200:
+                    res_json = response.json()
+                    candidates = res_json.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            text_output = parts[0].get("text", "")
+                            if text_output:
+                                return text_output
+                else:
+                    last_err = f"HTTP {response.status_code}: {response.text}"
+            except Exception as e:
+                last_err = e
+                continue
 
     raise Exception(f"فشل الاتصال بخدمة Gemini المباشرة: {last_err}")
 
@@ -545,7 +545,7 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور مع تحسين أداء حلقة المعاينة والرفع
+    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
