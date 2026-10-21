@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وقناع التغطية السفلي لإخفاء شريط Streamlit نهائياً
+# تطبيق خط Rubik وقناع التغطية السفلي القاطع لإخفاء الأيقونات تماماً
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -75,7 +75,7 @@ html, body, [class*='css'] {
 }
 
 .block-container {
-    padding: 1rem 0.8rem 3.5rem 0.8rem !important;
+    padding: 1rem 0.8rem 4.5rem 0.8rem !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -88,16 +88,16 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* قناع تغطية سفلي ثابت لإخفاء أيقونات وشعار Hosted with Streamlit تماماً */
-body::after {
-    content: "";
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 48px !important;
+/* قناع التغطية السفلي القاطع والشامل لتغطية الأيقونات نهائياً */
+#root::after, body::after {
+    content: "" !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 65px !important;
     background-color: #0e1117 !important;
-    z-index: 99999999 !important;
+    z-index: 999999999 !important;
     pointer-events: none !important;
 }
 
