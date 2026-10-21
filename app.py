@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وقناع التغطية السفلي القاطع لإخفاء الأيقونات تماماً
+# تطبيق خط Rubik وإلغاء القناع الرافِع وتنظيف الواجهة
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -74,8 +74,9 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
+/* إلغاء المسافات السفلية الزائدة لمنع دفع الشريط للأعلى */
 .block-container {
-    padding: 1rem 0.8rem 5rem 0.8rem !important;
+    padding: 1rem 0.8rem 1rem 0.8rem !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -88,20 +89,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* قناع التغطية السفلي المباشر والشامل */
-html::after, body::after, #root::after {
-    content: "" !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 70px !important;
-    background-color: #0e1117 !important;
-    z-index: 2147483647 !important;
-    pointer-events: none !important;
-}
-
-/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit كلياً */
+/* إخفاء شريط الأدوات وعناصر الاستضافة بأسلوب CSS المباشر الدقيق */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -132,187 +120,43 @@ div.viewerBadge {
     opacity: 0 !important;
     pointer-events: none !important;
 }
-
-.main-header {
-    background: linear-gradient(135deg, #0068c4 0%, #002b5c 100%);
-    padding: 12px 10px;
-    border-radius: 10px;
-    color: #ffffff !important;
-    text-align: center !important;
-    margin-bottom: 10px;
-}
-.main-header h1 {
-    font-size: 1.4rem;
-    font-weight: 800 !important;
-    margin-bottom: 4px;
-    text-align: center !important;
-    color: #ffffff !important;
-}
-.main-header p {
-    font-size: 0.98rem !important;
-    font-weight: 500 !important;
-    margin: 0;
-    text-align: center !important;
-    color: #f8fafc !important;
-}
-
-.section-box {
-    background-color: #1e293b !important;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    margin-bottom: 10px;
-}
-
-.section-title {
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    color: #ffffff !important;
-    margin-bottom: 8px;
-}
-
-.disclaimer-box {
-    background-color: #1e293b !important;
-    border-right: 4px solid #f59e0b !important;
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin: 2px 0 6px 0;
-    font-size: 0.82rem;
-    font-weight: 400 !important;
-    color: #cbd5e1 !important;
-    line-height: 1.4;
-}
-.disclaimer-title {
-    font-weight: 700 !important;
-    color: #fbbf24 !important;
-    margin-bottom: 2px;
-    font-size: 0.85rem;
-}
-
-.stButton>button {
-    width: 100% !important;
-    background-color: #0068c4 !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    border-radius: 8px !important;
-    padding: 10px !important;
-    border: none !important;
-    font-size: 0.92rem !important;
-    font-family: 'Rubik', sans-serif !important;
-}
-.stButton>button:hover {
-    background-color: #004d99 !important;
-    color: #ffffff !important;
-}
-
-[data-testid="stHorizontalBlock"] {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 8px !important;
-}
-[data-testid="stHorizontalBlock"] > div {
-    flex: 1 !important;
-    min-width: 0 !important;
-}
-
-.local-warning {
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    padding: 8px 12px;
-    border-radius: 8px;
-    color: #856404;
-    margin-top: 8px;
-    font-size: 0.85rem;
-    font-weight: 500 !important;
-}
-
-.status-card {
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-weight: 700 !important;
-    font-size: 1.1rem;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.status-safe {
-    background-color: rgba(16, 185, 129, 0.15);
-    border: 2px solid #10b981;
-    color: #34d399 !important;
-}
-
-.status-warning {
-    background-color: rgba(245, 158, 11, 0.15);
-    border: 2px solid #f59e0b;
-    color: #fbbf24 !important;
-}
-
-.status-danger {
-    background-color: rgba(239, 68, 68, 0.15);
-    border: 2px solid #ef4444;
-    color: #f87171 !important;
-}
-
-.report-container {
-    color: #f8fafc;
-    line-height: 1.7;
-    font-size: 0.95rem;
-    font-weight: 400 !important;
-}
-.report-title-custom {
-    color: #60a5fa !important;
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    margin-top: 16px !important;
-    margin-bottom: 6px !important;
-    display: block !important;
-}
-
-.rtl-menu-content ol, .rtl-menu-content ul {
-    padding-right: 1.5rem !important;
-    padding-left: 0rem !important;
-    margin-right: 0rem !important;
-}
-.rtl-menu-content li {
-    margin-bottom: 6px !important;
-    font-weight: 400 !important;
-}
-
-.preview-card {
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 8px;
-    margin: 6px 0 10px 0;
-    text-align: center;
-}
-.preview-card img {
-    max-width: 100%;
-    max-height: 320px;
-    border-radius: 6px;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto;
-}
 </style>
 
 <script>
-    const injectTopOverlay = () => {
+    const cleanStreamlitBadges = () => {
+        const selectors = [
+            '[data-testid="stManageApp"]',
+            '[data-testid="stStatusWidget"]',
+            '[data-testid="stAppToolbar"]',
+            '[data-testid="stActionButton"]',
+            'div[class*="viewerBadge"]',
+            'footer',
+            'header',
+            '#MainMenu',
+            'footer[data-testid="stFooter"]',
+            'a[href*="streamlit.cloud"]'
+        ];
+
+        const hideNodes = (doc) => {
+            if (!doc) return;
+            selectors.forEach(sel => {
+                doc.querySelectorAll(sel).forEach(node => {
+                    node.style.setProperty('display', 'none', 'important');
+                    node.style.setProperty('visibility', 'hidden', 'important');
+                    node.style.setProperty('opacity', '0', 'important');
+                });
+            });
+        };
+
         try {
-            const topDoc = window.top.document;
-            if (!topDoc.getElementById('global-streamlit-mask')) {
-                const mask = topDoc.createElement('div');
-                mask.id = 'global-streamlit-mask';
-                mask.style.cssText = 'position: fixed; bottom: 0; left: 0; width: 100vw; height: 75px; background-color: #0e1117; z-index: 2147483647; pointer-events: none;';
-                topDoc.body.appendChild(mask);
+            hideNodes(document);
+            if (window.parent && window.parent.document) {
+                hideNodes(window.parent.document);
             }
         } catch(e) {}
     };
 
-    injectTopOverlay();
-    setInterval(injectTopOverlay, 100);
+    setInterval(cleanStreamlitBadges, 100);
 </script>
 """, unsafe_allow_html=True)
 
