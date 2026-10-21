@@ -624,7 +624,7 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>برمجة Sakhr AlHubaish © 2026 الحقوق محفوظة</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>Developed by Sakhr AlHubaish | Copyright 2026</p>", unsafe_allow_html=True)
 
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
