@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وإخفاء زر إدارة التطبيق وشريط Streamlit نهائياً عبر CSS و JS محصن
+# تطبيق خط Rubik وحجب زر إدارة التطبيق السفلي عبر القناع والشريط القاطع
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -118,9 +118,6 @@ div.viewerBadge {
     width: 0px !important;
     opacity: 0 !important;
     pointer-events: none !important;
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
 }
 
 .main-header {
@@ -289,66 +286,40 @@ div.viewerBadge {
 </style>
 
 <script>
-    const hideManageAppCompletely = () => {
-        const selectors = [
-            '[data-testid="stManageApp"]',
-            '[data-testid="stStatusWidget"]',
-            '[data-testid="stAppToolbar"]',
-            '[data-testid="stActionButton"]',
-            'div[class*="viewerBadge"]',
-            'footer',
-            'header',
-            '#MainMenu',
-            'footer[data-testid="stFooter"]',
-            'a[href*="streamlit.cloud"]'
-        ];
-
-        const applyHide = (doc) => {
+    const blockManageAppFloating = () => {
+        const hideElements = (doc) => {
             if (!doc) return;
-            selectors.forEach(selector => {
-                doc.querySelectorAll(selector).forEach(el => {
-                    el.style.setProperty('display', 'none', 'important');
-                    el.style.setProperty('visibility', 'hidden', 'important');
-                    el.style.setProperty('opacity', '0', 'important');
-                    el.style.setProperty('pointer-events', 'none', 'important');
-                    if (el.parentNode) {
-                        try { el.parentNode.removeChild(el); } catch(e){}
-                    }
+            const selectors = [
+                '[data-testid="stManageApp"]',
+                '[data-testid="stStatusWidget"]',
+                '[data-testid="stAppToolbar"]',
+                '[data-testid="stActionButton"]',
+                'div[class*="viewerBadge"]',
+                'footer',
+                'header',
+                '#MainMenu',
+                'footer[data-testid="stFooter"]',
+                'a[href*="streamlit.cloud"]'
+            ];
+            selectors.forEach(sel => {
+                doc.querySelectorAll(sel).forEach(node => {
+                    node.style.setProperty('display', 'none', 'important');
+                    node.style.setProperty('visibility', 'hidden', 'important');
+                    node.style.setProperty('opacity', '0', 'important');
+                    node.style.setProperty('pointer-events', 'none', 'important');
                 });
             });
-            // إخفاء الستايل للأب بشكل إجباري
-            const styleId = 'custom-hide-manage-app';
-            if (!doc.getElementById(styleId)) {
-                const styleEl = doc.createElement('style');
-                styleEl.id = styleId;
-                styleEl.innerHTML = `
-                    [data-testid="stManageApp"], [data-testid="stAppToolbar"], [data-testid="stActionButton"], footer {
-                        display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                    }
-                `;
-                doc.head.appendChild(styleEl);
-            }
         };
 
-        applyHide(document);
-        if (window.parent && window.parent.document) {
-            applyHide(window.parent.document);
-        }
+        try {
+            hideElements(document);
+            if (window.parent && window.parent.document) {
+                hideElements(window.parent.document);
+            }
+        } catch(e) {}
     };
 
-    // تشغيل الإخفاء الفوري وتفعيله عبر المراقبة الحية للـ DOM
-    hideManageAppCompletely();
-    setInterval(hideManageAppCompletely, 50);
-
-    try {
-        const targetDoc = (window.parent && window.parent.document) ? window.parent.document : document;
-        const observer = new MutationObserver(() => {
-            hideManageAppCompletely();
-        });
-        observer.observe(targetDoc.body, { childList: true, subtree: true });
-    } catch(e) {}
+    setInterval(blockManageAppFloating, 30);
 </script>
 """, unsafe_allow_html=True)
 
