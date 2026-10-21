@@ -75,7 +75,7 @@ html, body, [class*='css'] {
 }
 
 .block-container {
-    padding: 1rem 0.8rem 4.5rem 0.8rem !important;
+    padding: 1rem 0.8rem 5rem 0.8rem !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -88,16 +88,16 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* قناع التغطية السفلي القاطع والشامل لتغطية الأيقونات نهائياً */
-#root::after, body::after {
+/* قناع التغطية السفلي المباشر والشامل */
+html::after, body::after, #root::after {
     content: "" !important;
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     width: 100vw !important;
-    height: 65px !important;
+    height: 70px !important;
     background-color: #0e1117 !important;
-    z-index: 999999999 !important;
+    z-index: 2147483647 !important;
     pointer-events: none !important;
 }
 
@@ -299,40 +299,20 @@ div.viewerBadge {
 </style>
 
 <script>
-    const blockManageAppFloating = () => {
-        const hideElements = (doc) => {
-            if (!doc) return;
-            const selectors = [
-                '[data-testid="stManageApp"]',
-                '[data-testid="stStatusWidget"]',
-                '[data-testid="stAppToolbar"]',
-                '[data-testid="stActionButton"]',
-                'div[class*="viewerBadge"]',
-                'footer',
-                'header',
-                '#MainMenu',
-                'footer[data-testid="stFooter"]',
-                'a[href*="streamlit.cloud"]'
-            ];
-            selectors.forEach(sel => {
-                doc.querySelectorAll(sel).forEach(node => {
-                    node.style.setProperty('display', 'none', 'important');
-                    node.style.setProperty('visibility', 'hidden', 'important');
-                    node.style.setProperty('opacity', '0', 'important');
-                    node.style.setProperty('pointer-events', 'none', 'important');
-                });
-            });
-        };
-
+    const injectTopOverlay = () => {
         try {
-            hideElements(document);
-            if (window.parent && window.parent.document) {
-                hideElements(window.parent.document);
+            const topDoc = window.top.document;
+            if (!topDoc.getElementById('global-streamlit-mask')) {
+                const mask = topDoc.createElement('div');
+                mask.id = 'global-streamlit-mask';
+                mask.style.cssText = 'position: fixed; bottom: 0; left: 0; width: 100vw; height: 75px; background-color: #0e1117; z-index: 2147483647; pointer-events: none;';
+                topDoc.body.appendChild(mask);
             }
         } catch(e) {}
     };
 
-    setInterval(blockManageAppFloating, 30);
+    injectTopOverlay();
+    setInterval(injectTopOverlay, 100);
 </script>
 """, unsafe_allow_html=True)
 
