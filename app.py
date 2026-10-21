@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# CSS قاطع وإجباري لإخفاء زر "إدارة التطبيق" وشريط الأدوات السفلي
+# تطبيق خط Rubik والتحكم الكامل بواجهة المستخدم
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -88,7 +88,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء إجباري وشامل لزر إدارة التطبيق وشريط Streamlit السفلي */
+/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -111,17 +111,13 @@ footer[data-testid="stFooter"],
 .viewerBadge_container__1QSob,
 .styles_viewerBadge__1yG5_,
 a.viewerBadge,
-div.viewerBadge,
-div[data-testid="stManageApp"] {
+div.viewerBadge {
     display: none !important;
     visibility: hidden !important;
     height: 0px !important;
     width: 0px !important;
     opacity: 0 !important;
     pointer-events: none !important;
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
 }
 
 .main-header {
@@ -290,28 +286,41 @@ div[data-testid="stManageApp"] {
 </style>
 
 <script>
-    const removeManageAppElements = () => {
-        const doc = window.parent.document;
-        const selectors = [
-            '[data-testid="stStatusWidget"]',
-            '[data-testid="stManageApp"]',
-            '[data-testid="stAppToolbar"]',
-            '[data-testid="stActionButton"]',
-            'div[class*="viewerBadge"]',
-            'footer',
-            'header',
-            '#MainMenu',
-            '.stAppBadge',
-            'footer[data-testid="stFooter"]',
-            'a[href*="streamlit.cloud"]'
-        ];
-        selectors.forEach(selector => {
-            doc.querySelectorAll(selector).forEach(el => {
-                el.remove();
+    const hardCleanManageApp = () => {
+        try {
+            const targets = [
+                '[data-testid="stManageApp"]',
+                '[data-testid="stStatusWidget"]',
+                '[data-testid="stAppToolbar"]',
+                '[data-testid="stActionButton"]',
+                'div[class*="viewerBadge"]',
+                'footer',
+                'header',
+                '#MainMenu',
+                'footer[data-testid="stFooter"]',
+                'a[href*="streamlit.cloud"]'
+            ];
+            
+            // تنظيف النطاق المحلي
+            targets.forEach(selector => {
+                document.querySelectorAll(selector).forEach(el => el.remove());
             });
-        });
+
+            // تنظيف النطاق الأب لـ Streamlit (Parent DOM)
+            if (window.parent && window.parent.document) {
+                targets.forEach(selector => {
+                    window.parent.document.querySelectorAll(selector).forEach(el => {
+                        el.style.display = 'none';
+                        el.style.visibility = 'hidden';
+                        el.remove();
+                    });
+                });
+            }
+        } catch (e) {
+            // الاستمرار في المحاولة في حال وجود قيود أمان
+        }
     };
-    setInterval(removeManageAppElements, 100);
+    setInterval(hardCleanManageApp, 100);
 </script>
 """, unsafe_allow_html=True)
 
