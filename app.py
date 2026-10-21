@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik بجميع أوزانه على كافة عناصر التطبيق
+# تطبيق خط Rubik وإخفاء تذييل وشعار Streamlit السفلي بالكامل
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -88,7 +88,7 @@ html, body, [class*='css'] {
     margin-bottom: -0.2rem !important;
 }
 
-/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
+/* إخفاء شريط الأدوات والقوائم وحزم تذييل الشاشة السفلي لـ Streamlit بالكامل */
 [data-testid="stSidebar"],
 [data-testid="stStatusWidget"],
 [data-testid="stDecoration"],
@@ -104,7 +104,12 @@ div[class*="viewerBadge"],
 a[href*="streamlit.cloud"],
 .viewerBadge,
 button[title*="Viewer"],
-[data-testid="stSidebarCollapsedControl"] {
+[data-testid="stSidebarCollapsedControl"],
+footer[data-testid="stFooter"],
+.viewerBadge_container__1QSob,
+.styles_viewerBadge__1yG5_,
+a.viewerBadge,
+div.viewerBadge {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
@@ -288,7 +293,9 @@ button[title*="Viewer"],
             'footer',
             'header',
             '#MainMenu',
-            '.stAppBadge'
+            '.stAppBadge',
+            'footer[data-testid="stFooter"]',
+            'a[href*="streamlit.cloud"]'
         ];
         selectors.forEach(selector => {
             doc.querySelectorAll(selector).forEach(el => {
@@ -297,7 +304,7 @@ button[title*="Viewer"],
             });
         });
     };
-    setInterval(cleanStreamlitElements, 200);
+    setInterval(cleanStreamlitElements, 100);
 </script>
 """, unsafe_allow_html=True)
 
