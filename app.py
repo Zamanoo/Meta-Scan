@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وحجب زر إدارة التطبيق السفلي عبر القناع والشريط القاطع
+# تطبيق خط Rubik وقناع التغطية السفلي لإخفاء شريط Streamlit نهائياً
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -75,7 +75,7 @@ html, body, [class*='css'] {
 }
 
 .block-container {
-    padding: 1rem 0.8rem 0.5rem 0.8rem !important;
+    padding: 1rem 0.8rem 3.5rem 0.8rem !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -86,6 +86,19 @@ html, body, [class*='css'] {
 
 .stElementContainer {
     margin-bottom: -0.2rem !important;
+}
+
+/* قناع تغطية سفلي ثابت لإخفاء أيقونات وشعار Hosted with Streamlit تماماً */
+body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px !important;
+    background-color: #0e1117 !important;
+    z-index: 99999999 !important;
+    pointer-events: none !important;
 }
 
 /* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit كلياً */
