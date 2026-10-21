@@ -582,7 +582,7 @@ if menu_option == "الرئيسية":
             st.warning("⚠️ الرجاء اختيار صورة المنشور أولاً.")
         else:
             image = Image.open(uploaded_image)
-            with st.spinner("جاري فحص الصورة بدقة عالية عبر الذكاء الاصطناعي..."):
+            with st.spinner("جاري فحص الصورة عبر مساعد الذكاء الاصطناعي..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
@@ -591,11 +591,11 @@ if menu_option == "الرئيسية":
                         "إذا كانت الصورة تحتوي شخصية محظورة أو أسلحة أو رموز مخالفة: STATUS: DANGER\n"
                         "إذا كانت الصورة تحتوي تلميحات أو عناصر مشبوهة: STATUS: WARNING\n\n"
                         "ثم اكتب التقرير بوضوح:\n"
-                        "خلاصة الفحص والتقييم العام:\n"
+                        "خلاصة الفحص والتقييم العام\n"
                         "(ملخص شامل وسريع عن حالة الصورة للقبول الإعلاني)\n\n"
-                        "فحص الشخصيات والعناصر المرئية:\n"
+                        "فحص الشخصيات والعناصر المرئية\n"
                         "(فحص الوجوه، الشخصيات العامة أو السياسية، الأسلحة، الرموز والشعارات)\n\n"
-                        "التوصيات والتعديلات المطلوبة:\n"
+                        "التوصيات والتعديلات المطلوبة\n"
                         "(إرشادات عمل لتعديل الصورة أو استبدالها لضمان الأمان)"
                     )
 
@@ -624,7 +624,7 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>تم برمجة التطبيق بواسطة Sakhr AlHubaish © 2026 | جميع الحقوق محفوظة</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>برمجة Sakhr AlHubaish © 2026 الحقوق محفوظة</p>", unsafe_allow_html=True)
 
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
