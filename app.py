@@ -66,7 +66,7 @@ html, body, [class*='css'] {
 /* ضبط المسافة والسحب بدقة ليظهر صندوق القائمة المنسدلة كاملاً غير مقطوع وبدون فراغ مزعج */
 .block-container {
     padding-top: 0.6rem !important;
-    padding-bottom: 1.0rem !important;
+    padding-bottom: 0.5rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
     margin-top: -1.0rem !important; 
@@ -158,7 +158,7 @@ button[title*="View fullscreen"] {
     border-right: 4px solid #f59e0b !important;
     padding: 8px 12px;
     border-radius: 6px;
-    margin: 2px 0 6px 0;
+    margin: 2px 0 4px 0;
     font-size: 0.82rem;
     font-weight: 400 !important;
     color: #cbd5e1 !important;
@@ -277,6 +277,24 @@ button[title*="View fullscreen"] {
     object-fit: contain;
     display: block;
     margin: 0 auto;
+}
+
+/* تنسيق خاص بحقوق التطبيق لضمان محاذاة اليسار وإلغاء الفراغ */
+.footer-copyright {
+    direction: ltr !important;
+    text-align: left !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+    padding: 0 !important;
+}
+.footer-copyright p {
+    color: #94a3b8 !important;
+    font-size: 0.78rem !important;
+    font-family: 'Rubik', sans-serif !important;
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 </style>
 
@@ -637,12 +655,10 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    # تعديل الحقوق: تقليل الفراغ العلوي (margin-top: 5px) وجعل النص لمحاذاة اليسار (text-align: left;)
+    # تطبيق فئة الحقوق الجديدة لضمان الالتصاق واليسار تماماً
     st.markdown("""
-    <div style="text-align: left; width: 100%; margin-top: 5px; margin-bottom: 5px; padding: 0 4px;">
-        <p style="color: #94a3b8; font-size: 0.8rem; font-family: 'Rubik', sans-serif; text-align: left; margin: 0;">
-            Developed by Sakhr AlHubaish | Copyright 2026
-        </p>
+    <div class="footer-copyright">
+        <p>Developed by Sakhr AlHubaish | Copyright 2026</p>
     </div>
     """, unsafe_allow_html=True)
 
