@@ -313,21 +313,34 @@ if "image_counter" not in st.session_state:
 if "user_post_text" not in st.session_state:
     st.session_state.user_post_text = ""
 
-# تهيئة Groq
+# تهيئة Groq (متوافق مع Render Environment Variables و Streamlit Secrets)
 try:
-    groq_key = st.secrets["GROQ_API_KEY"]
+    groq_key = os.environ.get("GROQ_API_KEY") or (st.secrets["GROQ_API_KEY"] if "GROQ_API_KEY" in st.secrets else None)
+    if not groq_key:
+        raise Exception("GROQ_API_KEY not found")
     groq_client = Groq(api_key=groq_key)
 except Exception:
-    st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة (Secrets).")
+    st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة.")
     st.stop()
 
-# استخراج مفاتيح Gemini Keys من Secrets
-gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
+# استخراج مفاتيح Gemini Keys (متوافق مع Render Environment Variables و Streamlit Secrets)
+gemini_keys = []
+try:
+    # محاولة جلب المفاتيح من Render Environment Variables إذا وجدت
+    env_gemini = os.environ.get("GEMINI_API_KEY")
+    if env_gemini:
+        gemini_keys = [k.strip() for k in env_gemini.split(",") if k.strip()]
+    
+    # أو من st.secrets إذا كانت موجودة
+    if not gemini_keys:
+        gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
+except Exception:
+    pass
 
 def analyze_image_with_gemini(image, prompt):
     """دالة فحص الصورة عبر Gemini باستخدام أحدث النماذج المعتمدة"""
     if not gemini_keys:
-        raise Exception("لا يوجد مفاتيح Gemini معرفة في Secrets.")
+        raise Exception("لا يوجد مفاتيح Gemini معرفة في إعدادات المنصة.")
 
     if image.mode != "RGB":
         image = image.convert("RGB")
