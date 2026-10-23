@@ -68,7 +68,7 @@ html, body, [class*='css'] {
     padding-bottom: 1rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: 0.0rem !important; 
+    margin-top: 0.2rem !important; 
 }
 
 [data-testid="stHeader"], 
