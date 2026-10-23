@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وإزالة الفراغ العلوي تماماً
+# تطبيق خط Rubik وضبط الفراغ العلوي ومنع ظهور عناصر الاستضافة
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -74,18 +74,22 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* سحب المحتوى للأعلى وإلغاء الفراغ العلوي */
+/* ضبط الفراغ العلوي بالقسبة الصحيحة والمجربة */
 .block-container {
     padding-top: 0rem !important;
     padding-bottom: 1rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: -0.1rem !important; /* النسبة الصحيحة والمجربة */ 
+    margin-top: -1.0rem !important; 
 }
 
-[data-testid="stHeader"], header {
+/* إخفاء تام لأي هيدر أو شريط حالة */
+[data-testid="stHeader"], header, [data-testid="stStatusWidget"], div[class*="StatusWidget"], .stStatusWidget, [data-testid="stDecoration"] {
     display: none !important;
+    visibility: hidden !important;
     height: 0px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -262,6 +266,32 @@ html, body, [class*='css'] {
     margin: 0 auto;
 }
 </style>
+
+<script>
+const cleanStreamlitElements = () => {
+    try {
+        const doc = window.parent.document;
+        const selectors = [
+            '[data-testid="stStatusWidget"]',
+            '[data-testid="stManageApp"]',
+            'div[class*="viewerBadge"]',
+            'div[class*="StatusWidget"]',
+            '.stStatusWidget',
+            'footer',
+            'header',
+            '#MainMenu',
+            '.stAppBadge'
+        ];
+        selectors.forEach(selector => {
+            doc.querySelectorAll(selector).forEach(el => {
+                el.remove();
+            });
+        });
+    } catch(e) {}
+};
+cleanStreamlitElements();
+setInterval(cleanStreamlitElements, 30);
+</script>
 """, unsafe_allow_html=True)
 
 # تهيئة حالة الجلسة
