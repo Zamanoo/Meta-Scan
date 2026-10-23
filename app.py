@@ -80,7 +80,7 @@ html, body, [class*='css'] {
     padding-bottom: 1rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: -3.0rem !important; 
+    margin-top: -2.0rem !important; 
 }
 
 [data-testid="stHeader"], header {
