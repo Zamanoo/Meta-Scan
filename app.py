@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik بجميع أوزانه على كافة عناصر التطبيق
+# تطبيق خط Rubik وإزالة الفراغ العلوي تماماً
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -74,8 +74,18 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
+/* سحب المحتوى للأعلى وإلغاء الفراغ العلوي */
 .block-container {
-    padding: 1rem 0.8rem 1rem 0.8rem !important;
+    padding-top: 0.2rem !important;
+    padding-bottom: 1rem !important;
+    padding-left: 0.8rem !important;
+    padding-right: 0.8rem !important;
+    margin-top: -2.2rem !important; 
+}
+
+[data-testid="stHeader"], header {
+    display: none !important;
+    height: 0px !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -86,31 +96,6 @@ html, body, [class*='css'] {
 
 .stElementContainer {
     margin-bottom: -0.1rem !important;
-}
-
-/* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
-[data-testid="stSidebar"],
-[data-testid="stStatusWidget"],
-[data-testid="stDecoration"],
-[data-testid="stHeader"],
-[data-testid="stToolbar"],
-[data-testid="stManageApp"],
-#MainMenu,
-header,
-footer,
-.stDeployButton,
-div[class*="StatusWidget"],
-div[class*="viewerBadge"],
-a[href*="streamlit.cloud"],
-.viewerBadge,
-button[title*="Viewer"],
-[data-testid="stSidebarCollapsedControl"] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    width: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
 }
 
 .main-header {
@@ -277,28 +262,6 @@ button[title*="Viewer"],
     margin: 0 auto;
 }
 </style>
-
-<script>
-const cleanStreamlitElements = () => {
-    const doc = window.parent.document;
-    const selectors = [
-        '[data-testid="stStatusWidget"]',
-        '[data-testid="stManageApp"]',
-        'div[class*="viewerBadge"]',
-        'footer',
-        'header',
-        '#MainMenu',
-        '.stAppBadge'
-    ];
-    selectors.forEach(selector => {
-        doc.querySelectorAll(selector).forEach(el => {
-            el.style.display = 'none';
-            el.style.visibility = 'hidden';
-        });
-    });
-};
-setInterval(cleanStreamlitElements, 200);
-</script>
 """, unsafe_allow_html=True)
 
 # تهيئة حالة الجلسة
@@ -313,9 +276,9 @@ if "image_counter" not in st.session_state:
 if "user_post_text" not in st.session_state:
     st.session_state.user_post_text = ""
 
-# تهيئة Groq (متوافق مع Render Environment Variables و Streamlit Secrets)
+# تهيئة Groq من متغيرات بيئة العمل (Render Environment Variables)
 try:
-    groq_key = os.environ.get("GROQ_API_KEY") or (st.secrets["GROQ_API_KEY"] if "GROQ_API_KEY" in st.secrets else None)
+    groq_key = os.environ.get("GROQ_API_KEY")
     if not groq_key:
         raise Exception("GROQ_API_KEY not found")
     groq_client = Groq(api_key=groq_key)
@@ -323,23 +286,14 @@ except Exception:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة.")
     st.stop()
 
-# استخراج جميع مفاتيح Gemini Keys تلقائياً من بيئة العمل (Render أو Streamlit Secrets)
+# استخراج جميع مفاتيح Gemini Keys تلقائياً من بيئة العمل في Render
 gemini_keys = []
 try:
-    # 1. البحث عن أي متغير بيئي يبدأ اسمه بـ GEMINI في Render
     for k, v in os.environ.items():
         if "GEMINI" in k.upper() and v and v.strip():
             clean_key = v.strip().replace("\n", "").replace("\r", "")
             if clean_key not in gemini_keys:
                 gemini_keys.append(clean_key)
-    
-    # 2. كخيار احتياطي من st.secrets إذا وجت
-    if not gemini_keys:
-        for k in st.secrets.keys():
-            if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip():
-                clean_key = st.secrets[k].strip().replace("\n", "").replace("\r", "")
-                if clean_key not in gemini_keys:
-                    gemini_keys.append(clean_key)
 except Exception:
     pass
 
