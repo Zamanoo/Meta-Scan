@@ -85,7 +85,7 @@ html, body, [class*='css'] {
 }
 
 .stElementContainer {
-    margin-bottom: -0.2rem !important;
+    margin-bottom: -0.1rem !important;
 }
 
 /* إخفاء شريط الأدوات والقوائم الحساسة في Streamlit */
@@ -518,7 +518,7 @@ if menu_option == "الرئيسية":
         if not post_content.strip():
             st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
         else:
-            with st.spinner("جاري تحليل النص وإعداد التقرير..."):
+            with st.spinner("جاري فحص النص يرجى الأنتظار قليلاً..."):
                 try:
                     system_prompt = (
                         "أنت خبير محترف في سياسات وإعلانات منصات Meta.\n"
