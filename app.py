@@ -25,10 +25,10 @@ SUSPICIOUS_KEYWORDS = {
     "political_and_sensitive": [
         "الحوثيون", "أنصار الله", "جماعة الحوثي", 
         "المجلس الانتقالي الجنوبي", 
-        "الانقلاب", "الانقلابيون", "الصراع اليمني", "الحرب في اليمن", "الهدنة", 
-        "المعتقلون السياسيون", "الأسرى", "السجناء السياسيون", 
-        "الاختفاء القسري", "الاعتقالات", "القمع", "حرية التعبير", "الاحتجاجات الشعبية", 
-        "المظاهرات", "الحوثيين", "العصيان المدني", "عبدالملك الحوثي", "الحوثي", "تقسيم اليمن", "الانفصال", "انصار الله", 
+        "الحوثيين", "الانقلابيون", "السيد حسن نصرالله", "الحرب في اليمن", "الهدنة", 
+        "المعتقلون السياسيون", "عبدالملك الحوثي", "السجناء السياسيون", 
+        "الاختفاء القسري", "الاعتقالات", "القمع", "صدام حسين السيد عبدالملك", "الاحتجاجات الشعبية", 
+        "المظاهرات", "حسن نصر الله", "العصيان المدني", "عبدالملك الحوثي", "الحوثي", "تقسيم اليمن", "الانفصال", "انصار الله", 
         "الوحدة اليمنية", "القضية الجنوبية", "النفوذ الإيراني", "النفوذ السعودي", 
         "التجنيد", "التجنيد الإجباري", "الانظمة العربية", "انتهاكات حقوق الإنسان", 
         "فلسطين", "غزة", "شعار الصرخة", "الضفة الغربية", "القدس", "إسرائيل", "الاحتلال الإسرائيلي", 
@@ -297,7 +297,6 @@ const cleanStreamlitElements = () => {
     } catch(e) {}
 };
 cleanStreamlitElements();
-// تكرار الفحص بشكل فوري كل 5 ميلي ثانية للقضاء على الومضة
 setInterval(cleanStreamlitElements, 5);
 </script>
 """, unsafe_allow_html=True)
@@ -629,7 +628,14 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>Developed by Sakhr AlHubaish | Copyright 2026</p>", unsafe_allow_html=True)
+    # التعديل هنا: استخدام حاوية مرنة لضمان التوسيط التام بنسبة 100% للحقوق
+    st.markdown("""
+    <div style="text-align: center; width: 100%; margin-top: 15px; margin-bottom: 5px;">
+        <p style="color: #94a3b8; font-size: 0.8rem; font-family: 'Rubik', sans-serif; text-align: center; margin: 0 auto;">
+            Developed by Sakhr AlHubaish | Copyright 2026
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
