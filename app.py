@@ -637,10 +637,10 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    # توسيط الحقوق في أسفل الصفحة
+    # تعديل الحقوق: تقليل الفراغ العلوي (margin-top: 5px) وجعل النص لمحاذاة اليسار (text-align: left;)
     st.markdown("""
-    <div style="text-align: center; width: 100%; margin-top: 15px; margin-bottom: 5px;">
-        <p style="color: #94a3b8; font-size: 0.8rem; font-family: 'Rubik', sans-serif; text-align: center; margin: 0 auto;">
+    <div style="text-align: left; width: 100%; margin-top: 5px; margin-bottom: 5px; padding: 0 4px;">
+        <p style="color: #94a3b8; font-size: 0.8rem; font-family: 'Rubik', sans-serif; text-align: left; margin: 0;">
             Developed by Sakhr AlHubaish | Copyright 2026
         </p>
     </div>
