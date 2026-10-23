@@ -76,11 +76,11 @@ html, body, [class*='css'] {
 
 /* سحب المحتوى للأعلى وإلغاء الفراغ العلوي */
 .block-container {
-    padding-top: 0.2rem !important;
+    padding-top: 0rem !important;
     padding-bottom: 1rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: -2.2rem !important; 
+    margin-top: -1.0rem !important; /* النسبة الصحيحة والمجربة */ 
 }
 
 [data-testid="stHeader"], header {
