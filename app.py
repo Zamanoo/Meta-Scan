@@ -44,7 +44,7 @@ SUSPICIOUS_KEYWORDS = {
         "المقاومة الفلسطينية", "حماس", "الجهة الإسلامية", "حزب الله", "حزب اللات", 
         "المقاومة المسلحة", "هتلر", "النازية", "القتال", "الاقتتال", "الحرب",  "خامنئي",  
         "سحل", "الأسلحة النووية", "استشهاد", "الشهيد", "الموت لأمريكا",  "السينوار", 
-        "الموت لامريكا", "الموت لإسرائيل", "الموت لأسرائيل", "الموت لاسرائيل", 
+        "الموت لامريكا","عبدالملك الحوثي","العدوان السعودي","الحوثيين", "الموت لإسرائيل", "الموت لأسرائيل", "الموت لاسرائيل", 
         "اللعنة على اليهود", "اللعنه على اليهود"
     ]
 }
@@ -59,7 +59,7 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وضبط الفراغ العلوي ومنع ظهور عناصر الاستضافة
+# تطبيق خط Rubik وضبط الفراغ العلوي ومنع ظهور عناصر الاستضافة والنقاط الثلاث
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -83,13 +83,25 @@ html, body, [class*='css'] {
     margin-top: -1.0rem !important; 
 }
 
-/* إخفاء تام لأي هيدر أو شريط حالة */
-[data-testid="stHeader"], header, [data-testid="stStatusWidget"], div[class*="StatusWidget"], .stStatusWidget, [data-testid="stDecoration"] {
+/* إخفاء تام وجذري لقائمة النقاط الثلاث والهيدر وكل ملحقات Streamlit من اللحظة الأولى */
+[data-testid="stHeader"], 
+header, 
+[data-testid="stStatusWidget"], 
+div[class*="StatusWidget"], 
+.stStatusWidget, 
+[data-testid="stDecoration"],
+#MainMenu, 
+[data-testid="stMainMenu"],
+button[kind="header"],
+div[data-testid="stToolbar"] {
     display: none !important;
     visibility: hidden !important;
     height: 0px !important;
+    width: 0px !important;
     opacity: 0 !important;
     pointer-events: none !important;
+    position: absolute !important;
+    z-index: -9999 !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -274,13 +286,16 @@ const cleanStreamlitElements = () => {
         const selectors = [
             '[data-testid="stStatusWidget"]',
             '[data-testid="stManageApp"]',
+            '[data-testid="stMainMenu"]',
             'div[class*="viewerBadge"]',
             'div[class*="StatusWidget"]',
             '.stStatusWidget',
             'footer',
             'header',
             '#MainMenu',
-            '.stAppBadge'
+            '.stAppBadge',
+            'button[kind="header"]',
+            'div[data-testid="stToolbar"]'
         ];
         selectors.forEach(selector => {
             doc.querySelectorAll(selector).forEach(el => {
@@ -290,7 +305,7 @@ const cleanStreamlitElements = () => {
     } catch(e) {}
 };
 cleanStreamlitElements();
-setInterval(cleanStreamlitElements, 30);
+setInterval(cleanStreamlitElements, 20);
 </script>
 """, unsafe_allow_html=True)
 
