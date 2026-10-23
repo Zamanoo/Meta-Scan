@@ -531,7 +531,7 @@ if menu_option == "الرئيسية":
         if not post_content.strip():
             st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
         else:
-            with st.spinner("جاري فحص النص يرجى الأنتظار قليلاً..."):
+            with st.spinner("جاري فحص النص عبر المساعدات الذكية..."):
                 try:
                     system_prompt = (
                         "أنت خبير محترف في سياسات وإعلانات منصات Meta.\n"
@@ -613,7 +613,7 @@ if menu_option == "الرئيسية":
             st.warning("⚠️ الرجاء اختيار صورة المنشور أولاً.")
         else:
             image = Image.open(uploaded_image)
-            with st.spinner("جاري فحص الصورة عبر مساعد الذكاء الاصطناعي..."):
+            with st.spinner("جاري فحص الصورة عبر المساعدات الذكية..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
