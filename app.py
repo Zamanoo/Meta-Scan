@@ -63,16 +63,16 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* ضبط المسافة العلوية لتنزيل القائمة المنسدلة قليلاً وبشكل مريح */
+/* إلغاء المسافة الفارغة العلوية بالكامل وإلصاق المحتوى بالأعلى */
 .block-container {
-    padding-top: 0.8rem !important;
+    padding-top: 0.0rem !important;
     padding-bottom: 1.0rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: -1.2rem !important; 
+    margin-top: -2.8rem !important; 
 }
 
-/* إخفاء محدد فقط لمكونات المنصة العلوية دون المساس بأزرار التطبيق */
+/* إخفاء شريط الهيدر وعناصر الاستضافة */
 [data-testid="stHeader"], 
 header, 
 [data-testid="stStatusWidget"], 
@@ -93,6 +93,16 @@ button[title*="View fullscreen"] {
     pointer-events: none !important;
     position: absolute !important;
     z-index: -9999 !important;
+}
+
+/* التأكيد على إظهار كافة أزرار التطبيق ورافع الملفات بصورة مؤكدة */
+.stButton, 
+.stButton > button, 
+[data-testid="stFileUploader"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .stTextInput, .stTextArea, .stSelectbox, .stMarkdown, h1, h2, h3, h4, h5, h6, p, div, button, input, textarea {
@@ -627,7 +637,7 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    # حاوية مرنة مخصصة لتوسيط الحقوق تماماً في أسفل الصفحة
+    # توسيط الحقوق في أسفل الصفحة
     st.markdown("""
     <div style="text-align: center; width: 100%; margin-top: 15px; margin-bottom: 5px;">
         <p style="color: #94a3b8; font-size: 0.8rem; font-family: 'Rubik', sans-serif; text-align: center; margin: 0 auto;">
