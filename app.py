@@ -72,7 +72,7 @@ html, body, [class*='css'] {
     margin-top: 0.0rem !important; 
 }
 
-/* إخفاء جذري وفوري لشريط الحالة، زر التوقف، والهيدر لمنع الومضة */
+/* إخفاء محدد فقط لمكونات المنصة العلوية دون المساس بأزرار التطبيق */
 [data-testid="stHeader"], 
 header, 
 [data-testid="stStatusWidget"], 
@@ -84,8 +84,7 @@ div[class*="StatusWidget"],
 button[kind="header"],
 div[data-testid="stToolbar"],
 button[aria-label="View fullscreen"],
-button[title*="View fullscreen"],
-button[kind="secondary"] {
+button[title*="View fullscreen"] {
     display: none !important;
     visibility: hidden !important;
     height: 0px !important;
@@ -297,8 +296,7 @@ const cleanStreamlitElements = () => {
     } catch(e) {}
 };
 cleanStreamlitElements();
-// تكرار الفحص بشكل فوري كل 5 ميلي ثانية للقضاء على الومضة
-setInterval(cleanStreamlitElements, 5);
+setInterval(cleanStreamlitElements, 15);
 </script>
 """, unsafe_allow_html=True)
 
@@ -629,7 +627,14 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='text-align: center; color: gray; font-size: 0.8rem; margin-top: 4px;'>Developed by Sakhr AlHubaish | Copyright 2026</p>", unsafe_allow_html=True)
+    # حاوية مرنة مخصصة لتوسيط الحقوق تماماً في أسفل الصفحة
+    st.markdown("""
+    <div style="text-align: center; width: 100%; margin-top: 15px; margin-bottom: 5px;">
+        <p style="color: #94a3b8; font-size: 0.8rem; font-family: 'Rubik', sans-serif; text-align: center; margin: 0 auto;">
+            Developed by Sakhr AlHubaish | Copyright 2026
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 elif menu_option == "دليل معايير مجتمع Meta":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
