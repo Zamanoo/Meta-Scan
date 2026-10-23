@@ -323,17 +323,23 @@ except Exception:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة.")
     st.stop()
 
-# استخراج مفاتيح Gemini Keys (متوافق مع Render Environment Variables و Streamlit Secrets)
+# استخراج جميع مفاتيح Gemini Keys تلقائياً من بيئة العمل (Render أو Streamlit Secrets)
 gemini_keys = []
 try:
-    # محاولة جلب المفاتيح من Render Environment Variables إذا وجدت
-    env_gemini = os.environ.get("GEMINI_API_KEY")
-    if env_gemini:
-        gemini_keys = [k.strip() for k in env_gemini.split(",") if k.strip()]
+    # 1. البحث عن أي متغير بيئي يبدأ اسمه بـ GEMINI في Render
+    for k, v in os.environ.items():
+        if "GEMINI" in k.upper() and v and v.strip():
+            clean_key = v.strip().replace("\n", "").replace("\r", "")
+            if clean_key not in gemini_keys:
+                gemini_keys.append(clean_key)
     
-    # أو من st.secrets إذا كانت موجودة
+    # 2. كخيار احتياطي من st.secrets إذا وجت
     if not gemini_keys:
-        gemini_keys = [st.secrets[k].strip() for k in st.secrets.keys() if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip()]
+        for k in st.secrets.keys():
+            if "GEMINI" in k.upper() and isinstance(st.secrets[k], str) and st.secrets[k].strip():
+                clean_key = st.secrets[k].strip().replace("\n", "").replace("\r", "")
+                if clean_key not in gemini_keys:
+                    gemini_keys.append(clean_key)
 except Exception:
     pass
 
