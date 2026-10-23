@@ -1,9 +1,3 @@
-# ------------------------------------------------------------------
-# Post SCAN Application
-# Copyright (c) 2026 Sakhr AlHubaish. All Rights Reserved.
-# Proprietary and Confidential - Developed for Meta Compliance Scanning
-# ------------------------------------------------------------------
-
 import streamlit as st
 import os
 import re
@@ -15,9 +9,6 @@ from PIL import Image
 
 st.set_page_config(page_title="Post SCAN", page_icon="🛡️", layout="centered", initial_sidebar_state="collapsed")
 
-# ------------------------------------------------------------------
-# القاموس المحلي للكلمات المشبوهة والدالة الخاصة بالتمويه
-# ------------------------------------------------------------------
 SUSPICIOUS_KEYWORDS = {
     "financial": [
         "ربح سريع", "ثراء فاحش", "ضعف أموالك", "استثمار مضمون", "بدون مجهود", 
@@ -50,7 +41,6 @@ SUSPICIOUS_KEYWORDS = {
 }
 
 def obfuscate_specific_words(text, forbidden_words):
-    """تقوم بتمويه الكلمات المخالفة فقط داخل النص عبر إضافة الكشيدة والنقاط بين أحرفها"""
     modified_text = text
     for word in forbidden_words:
         if word in modified_text:
@@ -59,7 +49,6 @@ def obfuscate_specific_words(text, forbidden_words):
             
     return modified_text
 
-# تطبيق خط Rubik وضبط الفراغ العلوي وإلغاء القوائم الجانبية تماماً
 st.markdown("""
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0068c4">
@@ -74,7 +63,6 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* ضبط الفراغ العلوي بالقسبة الصحيحة والمجربة */
 .block-container {
     padding-top: 0rem !important;
     padding-bottom: 1rem !important;
@@ -83,7 +71,6 @@ html, body, [class*='css'] {
     margin-top: -1.0rem !important; 
 }
 
-/* إخفاء تام وجذري لأي هيدر، نقاط ثلاث، أو أزرار تحكم بالمنصة */
 [data-testid="stHeader"], 
 header, 
 [data-testid="stStatusWidget"], 
@@ -311,7 +298,6 @@ setInterval(cleanStreamlitElements, 15);
 </script>
 """, unsafe_allow_html=True)
 
-# تهيئة حالة الجلسة
 if "text_result" not in st.session_state:
     st.session_state.text_result = None
 if "image_result" not in st.session_state:
@@ -323,7 +309,6 @@ if "image_counter" not in st.session_state:
 if "user_post_text" not in st.session_state:
     st.session_state.user_post_text = ""
 
-# تهيئة Groq من متغيرات بيئة العمل (Render Environment Variables)
 try:
     groq_key = os.environ.get("GROQ_API_KEY")
     if not groq_key:
@@ -333,7 +318,6 @@ except Exception:
     st.error("⚠️ تنبيه أمني: لم يتم العثور على المفتاح السري GROQ_API_KEY في إعدادات المنصة.")
     st.stop()
 
-# استخراج جميع مفاتيح Gemini Keys تلقائياً من بيئة العمل في Render
 gemini_keys = []
 try:
     for k, v in os.environ.items():
@@ -345,7 +329,6 @@ except Exception:
     pass
 
 def analyze_image_with_gemini(image, prompt):
-    """دالة فحص الصورة عبر Gemini باستخدام أحدث النماذج المعتمدة"""
     if not gemini_keys:
         raise Exception("لا يوجد مفاتيح Gemini معرفة في إعدادات المنصة.")
 
@@ -463,7 +446,6 @@ menu_option = st.selectbox(
 if menu_option == "الرئيسية":
     st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><center><p>تطبيق فاحص المنشورات الذكي للتعرف على المخاطر المحتملة قبل النشر، أستناداً إلى معايير Meta</p></center></div>', unsafe_allow_html=True)
 
-    # 1. قسم فحص نصوص المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
 
@@ -572,7 +554,6 @@ if menu_option == "الرئيسية":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 2. قسم فحص صور المنشور
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">🖼️ فحص صور المنشور</div>', unsafe_allow_html=True)
 
