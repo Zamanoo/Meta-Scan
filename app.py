@@ -63,13 +63,13 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* إلغاء المسافة الفارغة العلوية بالكامل وإلصاق المحتوى بالأعلى */
+/* ضبط المسافة والسحب بدقة ليظهر صندوق القائمة المنسدلة كاملاً غير مقطوع وبدون فراغ مزعج */
 .block-container {
-    padding-top: 0.0rem !important;
+    padding-top: 0.6rem !important;
     padding-bottom: 1.0rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: 0.0rem !important; 
+    margin-top: -1.0rem !important; 
 }
 
 /* إخفاء شريط الهيدر وعناصر الاستضافة */
