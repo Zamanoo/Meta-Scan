@@ -80,7 +80,7 @@ html, body, [class*='css'] {
     padding-bottom: 1rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: -0.4rem !important; /* النسبة الصحيحة والمجربة */ 
+    margin-top: -0.1rem !important; /* النسبة الصحيحة والمجربة */ 
 }
 
 [data-testid="stHeader"], header {
