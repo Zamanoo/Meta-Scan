@@ -63,14 +63,16 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
+/* ضبط المسافة العلوية لتنزيل القائمة المنسدلة قليلاً وبشكل مريح */
 .block-container {
-    padding-top: 0rem !important;
-    padding-bottom: 1rem !important;
+    padding-top: 0.8rem !important;
+    padding-bottom: 1.0rem !important;
     padding-left: 0.8rem !important;
     padding-right: 0.8rem !important;
-    margin-top: 0.1rem !important; 
+    margin-top: 0.0rem !important; 
 }
 
+/* إخفاء جذري وفوري لشريط الحالة، زر التوقف، والهيدر لمنع الومضة */
 [data-testid="stHeader"], 
 header, 
 [data-testid="stStatusWidget"], 
@@ -82,7 +84,8 @@ div[class*="StatusWidget"],
 button[kind="header"],
 div[data-testid="stToolbar"],
 button[aria-label="View fullscreen"],
-button[title*="View fullscreen"] {
+button[title*="View fullscreen"],
+button[kind="secondary"] {
     display: none !important;
     visibility: hidden !important;
     height: 0px !important;
@@ -294,7 +297,8 @@ const cleanStreamlitElements = () => {
     } catch(e) {}
 };
 cleanStreamlitElements();
-setInterval(cleanStreamlitElements, 15);
+// تكرار الفحص بشكل فوري كل 5 ميلي ثانية للقضاء على الومضة
+setInterval(cleanStreamlitElements, 5);
 </script>
 """, unsafe_allow_html=True)
 
