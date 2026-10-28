@@ -396,12 +396,12 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # استخدام النموذج الحديث والمضمون gemini-2.5-flash مع مسار v1
-    candidate_models = ["gemini-2.5-flash", "gemini-2.0-flash"]
+    # استخدام النموذج المطلوب حصرياً gemini-3.8-flash عبر مسار v1beta
+    candidate_models = ["gemini-3.8-flash"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
-            url = f"https://generativelanguage.googleapis.com/v1/models/{model_name}:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
             headers = {"Content-Type": "application/json"}
             payload = {
                 "contents": [
