@@ -396,8 +396,8 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    # استخدام الإصدار v1beta مع النماذج المدعومة حالياً للصور
-    candidate_models = ["gemini-2.5-flash", "gemini-1.5-flash"]
+    # الاعتماد على النموذج الحديث المطلوب gemini-3.8-flash عبر مسار v1beta
+    candidate_models = ["gemini-3.8-flash"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
