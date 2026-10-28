@@ -63,7 +63,6 @@ html, body, [class*='css'] {
     text-align: right !important;
 }
 
-/* ضبط المسافة والسحب بدقة ليظهر صندوق القائمة المنسدلة كاملاً غير مقطوع وبدون فراغ مزعج */
 .block-container {
     padding-top: 0.6rem !important;
     padding-bottom: 0.5rem !important;
@@ -72,7 +71,6 @@ html, body, [class*='css'] {
     margin-top: -1.0rem !important; 
 }
 
-/* إخفاء شريط الهيدر وعناصر الاستضافة */
 [data-testid="stHeader"], 
 header, 
 [data-testid="stStatusWidget"], 
@@ -95,7 +93,17 @@ button[title*="View fullscreen"] {
     z-index: -9999 !important;
 }
 
-/* التأكيد على إظهار كافة أزرار التطبيق ورافع الملفات بصورة مؤكدة */
+[data-testid="stConnectionStatus"],
+div[class*="stConnectionStatus"],
+div[class*="connectionError"],
+.element-container:has(iframe[title="streamlit_app"]),
+div[class*="stNotification"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 .stButton, 
 .stButton > button, 
 [data-testid="stFileUploader"] {
@@ -279,7 +287,6 @@ button[title*="View fullscreen"] {
     margin: 0 auto;
 }
 
-/* تنسيق خاص بحقوق التطبيق لضمان محاذاة اليسار وإلغاء الفراغ */
 .footer-copyright {
     direction: ltr !important;
     text-align: left !important;
@@ -314,7 +321,9 @@ const cleanStreamlitElements = () => {
             '#MainMenu',
             '.stAppBadge',
             'button[kind="header"]',
-            'div[data-testid="stToolbar"]'
+            'div[data-testid="stToolbar"]',
+            '[data-testid="stConnectionStatus"]',
+            'div[class*="connectionError"]'
         ];
         selectors.forEach(selector => {
             doc.querySelectorAll(selector).forEach(el => {
@@ -325,6 +334,12 @@ const cleanStreamlitElements = () => {
 };
 cleanStreamlitElements();
 setInterval(cleanStreamlitElements, 15);
+
+setInterval(() => {
+    try {
+        window.parent.postMessage({type: "streamlit:ping"}, "*");
+    } catch(e) {}
+}, 10000);
 </script>
 """, unsafe_allow_html=True)
 
@@ -381,7 +396,8 @@ def analyze_image_with_gemini(image, prompt):
     img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     last_err = None
-    candidate_models = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-1.5-flash"]
+    # تحديث أسماء النماذج إلى النماذج الرسمية والمستقرة والمتاحة في Gemini REST API
+    candidate_models = ["gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-pro"]
 
     for api_key in gemini_keys:
         for model_name in candidate_models:
@@ -474,7 +490,7 @@ menu_option = st.selectbox(
 )
 
 if menu_option == "الرئيسية":
-    st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><center><p>تطبيق فاحص المنشورات الذكي للتعرف بالمخاطر المحتملة قبل النشر، أستناداً لمعايير Meta</p></center></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🛡️ POST SCAN</h1><center><p>تطبيق فاحص المنشورات الذكي للتعرف على المخاطر المحتملة قبل النشر، أستناداً إلى معايير Meta</p></center></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">✍️ فحص نصوص المنشور</div>', unsafe_allow_html=True)
@@ -531,7 +547,7 @@ if menu_option == "الرئيسية":
         if not post_content.strip():
             st.warning("⚠️ الرجاء كتابة نص المنشور أولاً.")
         else:
-            with st.spinner("جاري فحص النص عبر المساعدات الذكية..."):
+            with st.spinner("جاري فحص النص يرجى الأنتظار قليلاً..."):
                 try:
                     system_prompt = (
                         "أنت خبير محترف في سياسات وإعلانات منصات Meta.\n"
@@ -540,11 +556,11 @@ if menu_option == "الرئيسية":
                         "إذا كان يحتوي مخاطر وحظر مباشر اكتب في السطر الأول: STATUS: DANGER\n"
                         "إذا كان يحتوي كلمات محتملة للشك اكتب في السطر الأول: STATUS: WARNING\n\n"
                         "ثم اكتب التقرير بالهيكلية التالية:\n"
-                        "خلاصة الفحص والتقييم العام\n"
+                        "خلاصة الفحص والتقييم العام:\n"
                         "(ملخص شامل وسريع عن حالة النص للقبول الإعلاني)\n\n"
-                        "التقرير التفصيلي والكلمات الحساسة\n"
+                        "التقرير التفصيلي والكلمات الحساسة:\n"
                         "(فحص الكلمات الحساسة، السياق، والمخاطر المباشرة أو الخفية)\n\n"
-                        "البديل الموصى به والمتوافق\n"
+                        "البديل الموصى به والمتوافق:\n"
                         "(صياغة بديلة آمنة ومضمونة 100% لتجنب أي رفض إعلاني)"
                     )
 
@@ -613,7 +629,7 @@ if menu_option == "الرئيسية":
             st.warning("⚠️ الرجاء اختيار صورة المنشور أولاً.")
         else:
             image = Image.open(uploaded_image)
-            with st.spinner("جاري فحص الصورة عبر المساعدات الذكية..."):
+            with st.spinner("جاري فحص الصورة عبر مساعد الذكاء الاصطناعي..."):
                 try:
                     image_prompt = (
                         "أنت خبير فحص سياسات إعلانات ومعايير مجتمع Meta.\n"
@@ -655,7 +671,6 @@ if menu_option == "الرئيسية":
     </div>
     """, unsafe_allow_html=True)
 
-    # تطبيق فئة الحقوق الجديدة لضمان الالتصاق واليسار تماماً
     st.markdown("""
     <div class="footer-copyright">
         <p>Developed by Sakhr AlHubaish | Copyright 2026</p>
@@ -711,9 +726,9 @@ elif menu_option == "سياسة المستخدم":
     <div class="rtl-menu-content">
         <p>يرجى قراءة بنود وسياسة استخدام التطبيق بعناية:</p>
         <ol>
-            <li>النتائج يتم توليدها عبر مساعدات محلية ومساعدات بالذكاء الاصطناعي والتطبيق غير مسؤول عن أي قرارات تتخذها بناءً عليها.</li>
+            <li>النتائج يتم توليدها عبر الذكاء الاصطناعي والتطبيق غير مسؤول عن أي قرارات تتخذها بناءً عليها.</li>
             <li>قد تحصل اخطأ أحياناً عند فحص النصوص والصور في حال كان هناك ضغط على نماذج فحص الذكاء الاصطناعي.</li>
-            <li>النتائج تقديرية ومبنية وفق معايير Meta.</li>
+            <li>النتائج تقريبية ومبنية على معايير Meta.</li>
             <li>يمنع استخدام التطبيق لفحص مواد تخالف القانون أو الآداب العامة.</li>
         </ol>
     </div>
@@ -725,7 +740,7 @@ elif menu_option == "عن التطبيق":
     st.markdown('<div class="section-title">ℹ️ عن التطبيق</div>', unsafe_allow_html=True)
     st.markdown('''
     <div class="rtl-menu-content">
-        <p>تم برمجة وتطوير هذا التطبيق بواسطة <b>Sakhr AlHubaish</b> لمساعدة المستخدمين في فحص المنشورات والوعي بالمعايير الصحيحة لتجنب قيود Meta.</p>
+        <p>تم برمجة وتطوير هذا التطبيق بواسطة <b>Sakhr AlHubaish</b> لمساعدة المستخدمين في فحص المنشورات والإعلانات لتجنب قيود Meta.</p>
         <p>اصدار التطبيق v1.0 </p>
     </div>
     ''', unsafe_allow_html=True)
@@ -736,7 +751,7 @@ elif menu_option == "راسل التطبيق":
     st.markdown('<div class="section-title">📬 راسل التطبيق</div>', unsafe_allow_html=True)
     st.markdown('''
     <div class="rtl-menu-content">
-        <p>يسعدني تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:</p>
+        <p>يسعدنا تلقي استفساراتكم وملاحظاتكم عبر البريد الإلكتروني:</p>
         <p>📧 <b>sakhrs545@gmail.com</b></p>
     </div>
     ''', unsafe_allow_html=True)
